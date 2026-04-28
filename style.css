@@ -10,3 +10,56 @@
   padding: 15px;
   border-radius: 8px;
 }
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  padding: 30px;
+}
+
+.calendar-box {
+  max-width: 900px;
+  margin: auto;
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+}
+
+.weekdays,
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+
+.weekdays div {
+  font-weight: bold;
+  text-align: center;
+}
+
+.days div {
+  background: #e0e0e0;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 5px 5px 15px 0;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+.month-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 25px;
+}
