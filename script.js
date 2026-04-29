@@ -1,3 +1,4 @@
+let events = {};
 let month =3; // April (0 = Jan, 3= April)
 let year = 2026;
 
@@ -65,14 +66,21 @@ function createDays() {
   for (let i = 1; i <= daysInMonth; i++) {
     const day = document.createElement("div");
     day.innerText = i;
+    day.onclick = function () {
+      let userEvent = prompt("Enter event:");
+
+  if (userEvent) {
+    alert("Event saved: " + userEvent);
+  }
+ };
     if (
   i === today.getDate() &&
   month === today.getMonth() &&
   year === today.getFullYear()
-) {
+ ) {
   day.style.background = "green";
   day.style.color = "white";
-}
+ }
     daysBox.appendChild(day);
   }
 }
