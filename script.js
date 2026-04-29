@@ -67,12 +67,15 @@ function createDays() {
     const day = document.createElement("div");
     day.innerText = i;
     day.onclick = function () {
-      let userEvent = prompt("Enter event:");
+  let key = year + "-" + month + "-" + i;
+
+  let userEvent = prompt("Enter event:");
 
   if (userEvent) {
-    alert("Event saved: " + userEvent);
+    events[key] = userEvent;
+    day.innerText = i + "\n" + userEvent;
   }
- };
+};
     if (
   i === today.getDate() &&
   month === today.getMonth() &&
