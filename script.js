@@ -1,4 +1,4 @@
-let events = {};
+let events = JSON.parse(localStorage.getItem("calendarEvents")) || {};
 let month =3; // April (0 = Jan, 3= April)
 let year = 2026;
 
@@ -73,6 +73,7 @@ function createDays() {
 
   if (userEvent) {
     events[key] = userEvent;
+    localStorage.setItem("calendarEvents", JSON.stringify(events));
     day.innerText = i + "\n" + userEvent;
   }
 };
@@ -88,4 +89,4 @@ function createDays() {
   }
 }
 
-createDays();
+updateMonth();

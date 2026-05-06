@@ -57,7 +57,7 @@ button:hover {
   background: #1d4ed8;
 }
 
-.month-header {
+.month-bar{
   display: flex;
   align-items: center;
   gap: 15px;
