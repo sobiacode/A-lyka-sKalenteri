@@ -1,6 +1,8 @@
 let events = JSON.parse(localStorage.getItem("calendarEvents")) || {};
-let month =3; // April (0 = Jan, 3= April)
-let year = 2026;
+const currentDate = new Date();
+
+let month = currentDate.getMonth();
+let year = currentDate.getFullYear();
 
 const months = [
     "Tammikuu", "Helmikuu", "Maaliskuu", "Huhtikuu", "Toukokuu", "Kesäkuu", 
@@ -66,16 +68,56 @@ function createDays() {
   for (let i = 1; i <= daysInMonth; i++) {
     const day = document.createElement("div");
     day.innerText = i;
-    day.onclick = function () {
-  let key = year + "-" + month + "-" + i;
+   let key = year + "-" + month + "-" + i;
 
-  let userEvent = prompt("Enter event:");
-
-  if (userEvent) {
-    events[key] = userEvent;
-    localStorage.setItem("calendarEvents", JSON.stringify(events));
-    day.innerText = i + "\n" + userEvent;
+if (events[key]) {
+  day.innerText = i + "\n" + events[key];
+   if (events[key].includes("exam")) {
+    day.style.background = "red";
+    day.style.color = "white";
   }
+
+  if (events[key].includes("birthday")) {
+    day.style.background = "pink";
+  }
+
+  if (events[key].includes("meeting")) {
+    day.style.background = "blue";
+    day.style.color = "white";
+  }
+}
+
+day.onclick = function () {
+
+  if (events[key]) {
+
+    let choice = prompt("1 = Edit\n2 = Delete");
+
+    if (choice === "1") {
+
+      let newEvent = prompt("Edit event:", events[key]);
+
+      if (newEvent) {
+        events[key] = newEvent;
+      }
+
+    } else if (choice === "2") {
+
+      delete events[key];
+    }
+
+  } else {
+
+    let userEvent = prompt("Enter event:");
+
+    if (userEvent) {
+      events[key] = userEvent;
+    }
+  }
+
+  localStorage.setItem("calendarEvents", JSON.stringify(events));
+
+  createDays();
 };
     if (
   i === today.getDate() &&
@@ -90,3 +132,9 @@ function createDays() {
 }
 
 updateMonth();
+
+document.getElementById("darkModeBtn").onclick = function () {
+
+  document.body.classList.toggle("dark");
+
+};
