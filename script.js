@@ -1,8 +1,15 @@
 let events = JSON.parse(localStorage.getItem("calendarEvents")) || {};
 const currentDate = new Date();
 
-let month = currentDate.getMonth();
-let year = currentDate.getFullYear();
+let month =
+  localStorage.getItem("savedMonth") !== null
+    ? Number(localStorage.getItem("savedMonth"))
+    : currentDate.getMonth();
+
+let year =
+  localStorage.getItem("savedYear") !== null
+    ? Number(localStorage.getItem("savedYear"))
+    : currentDate.getFullYear();
 
 const months = [
     "Tammikuu", "Helmikuu", "Maaliskuu", "Huhtikuu", "Toukokuu", "Kesäkuu", 
@@ -13,19 +20,30 @@ function updateMonth() {
   document.getElementById("monthTitle").innerText = months[month] + " " + year;
   createDays();
  }
-document.getElementById("prevBtn").onclick = function () {  month--;
+document.getElementById("prevBtn").onclick = function () {
+  month--;
+
   if (month < 0) {
     month = 11;
     year--;
   }
+
+  localStorage.setItem("savedMonth", month);
+  localStorage.setItem("savedYear", year);
+
   updateMonth();
 };
 document.getElementById("nextBtn").onclick = function () {
   month++;
+
   if (month > 11) {
     month = 0;
     year++;
   }
+
+  localStorage.setItem("savedMonth", month);
+  localStorage.setItem("savedYear", year);
+
   updateMonth();
 };
 const daysBox = document.getElementById("daysBox");
@@ -80,11 +98,25 @@ if (events[key]) {
 ) {
   continue;
 }
-  day.innerHTML = `
-    ${i}<br>
-    ${events[key]} 
-    <span class="deleteBtn">❌</span>
-  `;
+  let eventText = events[key];
+
+if (eventText.includes("exam")) {
+  eventText = "📚 " + eventText;
+}
+
+if (eventText.includes("birthday")) {
+  eventText = "🎂 " + eventText;
+}
+
+if (eventText.includes("meeting")) {
+  eventText = "💼 " + eventText;
+}
+
+day.innerHTML = `
+  ${i}<br>
+  ${eventText}
+  <span class="deleteBtn">❌</span>
+`;
   const deleteBtn = day.querySelector(".deleteBtn");
 
 deleteBtn.onclick = function (event) {
@@ -168,3 +200,14 @@ document.getElementById("darkModeBtn").onclick = function () {
 document.getElementById("searchInput").oninput = function () {
   createDays();
 };
+function updateClock() {
+
+  const now = new Date();
+
+  document.getElementById("clock").innerText =
+    now.toLocaleTimeString();
+}
+
+setInterval(updateClock, 1000);
+
+updateClock();
