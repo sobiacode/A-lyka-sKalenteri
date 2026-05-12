@@ -84,9 +84,13 @@ function createDays() {
  ) {
   day.style.background = "green";
   day.style.color = "white";
+  day.style.border = "3px solid yellow";
  }
     daysBox.appendChild(day);
   }
 }
 
 updateMonth();
+document.getElementById("darkModeBtn").onclick = function () {
+  document.body.classList.toggle("dark");
+};

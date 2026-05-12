@@ -63,3 +63,20 @@ button:hover {
   gap: 15px;
   margin-top: 25px;
 }
+.dark {
+  background: #1e1e1e;
+  color: white;
+}
+
+.dark .calendar-box {
+  background: #2c2c2c;
+}
+
+.dark .days div {
+  background: #444;
+  color: white;
+}
+
+.dark .weekdays div {
+  color: white;
+}
