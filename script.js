@@ -48,7 +48,10 @@ function getDaysInMonth(month, year) {
 
 function createDays() {
   daysBox.innerHTML = "";
-
+const searchText = document
+  .getElementById("searchInput")
+  .value
+  .toLowerCase();
   const today = new Date();
 
   const firstDay = new Date(year, month, 1).getDay();
@@ -71,7 +74,32 @@ function createDays() {
    let key = year + "-" + month + "-" + i;
 
 if (events[key]) {
-  day.innerText = i + "\n" + events[key];
+  if (
+  searchText &&
+  !events[key].toLowerCase().includes(searchText)
+) {
+  continue;
+}
+  day.innerHTML = `
+    ${i}<br>
+    ${events[key]} 
+    <span class="deleteBtn">❌</span>
+  `;
+  const deleteBtn = day.querySelector(".deleteBtn");
+
+deleteBtn.onclick = function (event) {
+
+  event.stopPropagation();
+
+  delete events[key];
+
+  localStorage.setItem(
+    "calendarEvents",
+    JSON.stringify(events)
+  );
+
+  createDays();
+};
    if (events[key].includes("exam")) {
     day.style.background = "red";
     day.style.color = "white";
@@ -131,17 +159,12 @@ day.onclick = function () {
     daysBox.appendChild(day);
   }
 }
-
 updateMonth();
-<<<<<<< HEAD
+
 document.getElementById("darkModeBtn").onclick = function () {
   document.body.classList.toggle("dark");
 };
-=======
 
-document.getElementById("darkModeBtn").onclick = function () {
-
-  document.body.classList.toggle("dark");
-
+document.getElementById("searchInput").oninput = function () {
+  createDays();
 };
->>>>>>> af9c54a881b761cc4081d760e625f4f04045d650
