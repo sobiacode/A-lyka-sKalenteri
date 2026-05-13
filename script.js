@@ -194,9 +194,18 @@ day.onclick = function () {
 updateMonth();
 
 document.getElementById("darkModeBtn").onclick = function () {
-  document.body.classList.toggle("dark");
-};
 
+  document.body.classList.toggle("dark");
+
+  if (document.body.classList.contains("dark")) {
+
+    localStorage.setItem("darkMode", "on");
+
+  } else {
+
+    localStorage.setItem("darkMode", "off");
+  }
+};
 document.getElementById("searchInput").oninput = function () {
   createDays();
 };
@@ -211,3 +220,7 @@ function updateClock() {
 setInterval(updateClock, 1000);
 
 updateClock();
+
+if (localStorage.getItem("darkMode") === "on") {
+  document.body.classList.add("dark");
+}
