@@ -211,3 +211,18 @@ function updateClock() {
 setInterval(updateClock, 1000);
 
 updateClock();
+document.getElementById("clearBtn").onclick = function () {
+
+  let confirmDelete = confirm(
+    "Delete all events?"
+  );
+
+  if (confirmDelete) {
+
+    localStorage.removeItem("calendarEvents");
+
+    events = {};
+
+    createDays();
+  }
+};
