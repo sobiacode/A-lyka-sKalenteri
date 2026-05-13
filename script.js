@@ -113,8 +113,8 @@ if (eventText.includes("meeting")) {
 }
 
 day.innerHTML = `
-  ${i}<br>
-  ${eventText}
+  ${i}
+  <span class="eventText">${eventText}</span>
   <span class="deleteBtn">❌</span>
 `;
   const deleteBtn = day.querySelector(".deleteBtn");
