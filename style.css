@@ -6,13 +6,18 @@
 }
 
 .days div {
-  background-color: #e0e0e0;
-  padding: 15px;
-  border-radius: 8px;
+  background: #e0e0e0;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 body {
   font-family: Arial, sans-serif;
-  background: #f4f6f8;
+ background: linear-gradient(to right, #dbeafe, #f0f9ff);
   padding: 30px;
 }
 
@@ -22,8 +27,13 @@ body {
   background: white;
   padding: 25px;
   border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: 0.3s;
 }
-
+.calendar-box:hover {
+  transform: scale(1.01);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
 .weekdays,
 .days {
   display: grid;
@@ -34,8 +44,10 @@ body {
 .weekdays div {
   font-weight: bold;
   text-align: center;
+  background: #dbeafe;
+  padding: 10px;
+  border-radius: 10px;
 }
-
 .days div {
   background: #e0e0e0;
   padding: 20px;
@@ -57,8 +69,9 @@ button:hover {
   background: #1d4ed8;
 }
 
-.month-bar{
+.month-header {
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 15px;
   margin-top: 25px;
@@ -78,5 +91,145 @@ button:hover {
 }
 
 .dark .weekdays div {
+  background: #374151;
+  color: white;
+}
+.days div:hover {
+  transform: scale(1.05);
+  transition: 0.2s;
+  cursor: pointer;
+}
+#searchInput {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  width: 220px;
+  margin-bottom: 15px;
+  outline: none;
+  transition: 0.2s;
+}
+#searchInput:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
+}
+
+button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 5px 5px 15px 0;
+  transition: 0.2s;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  .calendar-box {
+    padding: 15px;
+  }
+
+  .month-header {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .days div {
+    padding: 10px;
+    min-height: 55px;
+    font-size: 12px;
+  }
+
+  button,
+  #searchInput {
+    width: 100%;
+  }
+}
+#clock {
+  font-size: 22px;
+  font-weight: bold;
+  color: #2563eb;
+  margin-bottom: 10px;
+}
+footer {
+  text-align: center;
+  margin-top: 20px;
+  color: #666;
+  font-size: 14px;
+}
+.dark footer {
+  color: #ccc;
+}
+#todayText {
+  color: #374151;
+  margin-bottom: 5px;
+}
+.dark #todayText {
+  color: white;
+}
+.deleteBtn {
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 5px;
+  display: inline-block;
+}
+
+.deleteBtn:hover {
+  transform: scale(1.2);
+}
+#monthTitle {
+  color: #1d4ed8;
+  font-size: 28px;
+}
+.dark #monthTitle {
+  color: #93c5fd;
+}
+.dark #clock {
+  color: #93c5fd;
+}
+.days div {
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.info-box {
+  background: #eef2ff;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.dark .info-box {
+  background: #374151;
+  color: white;
+}
+.info-box {
+  background: #eef2ff;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.dark .info-box {
+  background: #374151;
   color: white;
 }

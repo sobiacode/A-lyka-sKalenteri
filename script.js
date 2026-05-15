@@ -15,7 +15,11 @@ const months = [
     "Tammikuu", "Helmikuu", "Maaliskuu", "Huhtikuu", "Toukokuu", "Kesäkuu", 
     "Heinäkuu", "Elokuu", "Syyskuu", "Lokakuu", "Marraskuu" ,"Joulukuu"
 ];
-
+const holidays = {
+  "2026-0-1": "🎉 Uusivuosi",
+  "2026-4-1": "🎈 Vappu",
+  "2026-11-25": "🎄 Joulu"
+};
 function updateMonth() { 
   document.getElementById("monthTitle").innerText = months[month] + " " + year;
   createDays();
@@ -90,7 +94,17 @@ const searchText = document
     const day = document.createElement("div");
     day.innerText = i;
    let key = year + "-" + month + "-" + i;
+   if (holidays[key]) {
 
+  day.innerHTML = `
+    ${i}<br>
+    ${holidays[key]}
+  `;
+
+  day.style.background = "#fef3c7";
+  day.style.fontWeight = "bold";
+  day.style.color = "#92400e";
+}
 if (events[key]) {
   if (
   searchText &&
@@ -184,9 +198,11 @@ day.onclick = function () {
   month === today.getMonth() &&
   year === today.getFullYear()
  ) {
-  day.style.background = "green";
-  day.style.color = "white";
-  day.style.border = "3px solid yellow";
+  day.style.background = "#22c55e";
+day.style.color = "white";
+day.style.border = "3px solid #facc15";
+day.style.fontWeight = "bold";
+day.style.boxShadow = "0 0 10px rgba(0,0,0,0.2)";
  }
     daysBox.appendChild(day);
   }
@@ -194,8 +210,22 @@ day.onclick = function () {
 updateMonth();
 
 document.getElementById("darkModeBtn").onclick = function () {
+
   document.body.classList.toggle("dark");
+
+  if (document.body.classList.contains("dark")) {
+
+    localStorage.setItem("darkMode", "on");
+
+  } else {
+
+    localStorage.setItem("darkMode", "off");
+  }
 };
+if (localStorage.getItem("darkMode") === "on") {
+
+  document.body.classList.add("dark");
+}
 
 document.getElementById("searchInput").oninput = function () {
   createDays();
@@ -226,3 +256,7 @@ document.getElementById("clearBtn").onclick = function () {
     createDays();
   }
 };
+const today = new Date();
+
+document.getElementById("todayText").innerText =
+  today.toDateString();
