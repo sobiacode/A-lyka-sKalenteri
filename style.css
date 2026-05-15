@@ -15,6 +15,11 @@
   flex-direction: column;
   justify-content: center;
 }
+.days div:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+  transition: 0.2s;
+}
 body {
   font-family: Arial, sans-serif;
  background: linear-gradient(to right, #dbeafe, #f0f9ff);

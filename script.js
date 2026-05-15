@@ -36,202 +36,26 @@ document.getElementById("prevBtn").onclick = function () {
   localStorage.setItem("savedYear", year);
 
   updateMonth();
-};
-document.getElementById("nextBtn").onclick = function () {
-  month++;
-
-  if (month > 11) {
-    month = 0;
-    year++;
-  }
-
-  localStorage.setItem("savedMonth", month);
-  localStorage.setItem("savedYear", year);
-
-  updateMonth();
-};
-const daysBox = document.getElementById("daysBox");
-function getDaysInMonth(month, year) {
-  // February
-  if (month === 1) {
-    if ((year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)) {
-      return 29;
-    }
-    return 28;
-  }
-
-  // April, June, September, November
-  if (month === 3 || month === 5 || month === 8 || month === 10) {
-    return 30;
-  }
-
-  return 31;
-}
-
-function createDays() {
-  daysBox.innerHTML = "";
-const searchText = document
-  .getElementById("searchInput")
-  .value
-  .toLowerCase();
-  const today = new Date();
-
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = getDaysInMonth(month, year);
-
-  let emptyBoxes = firstDay - 1;
-
-  if (emptyBoxes < 0) {
-    emptyBoxes = 6;
-  }
-
-  for (let i = 0; i < emptyBoxes; i++) {
-    const emptyDay = document.createElement("div");
-    daysBox.appendChild(emptyDay);
-  }
-
-  for (let i = 1; i <= daysInMonth; i++) {
-    const day = document.createElement("div");
-    day.innerText = i;
-   let key = year + "-" + month + "-" + i;
-   if (holidays[key]) {
-
-  day.innerHTML = `
-    ${i}<br>
-    ${holidays[key]}
-  `;
-
-  day.style.background = "#fef3c7";
-  day.style.fontWeight = "bold";
-  day.style.color = "#92400e";
-}
-if (events[key]) {
-  if (
-  searchText &&
-  !events[key].toLowerCase().includes(searchText)
-) {
-  continue;
-}
-  let eventText = events[key];
-
-if (eventText.includes("exam")) {
-  eventText = "📚 " + eventText;
-}
-
-if (eventText.includes("birthday")) {
-  eventText = "🎂 " + eventText;
-}
-
-if (eventText.includes("meeting")) {
-  eventText = "💼 " + eventText;
-}
-
-day.innerHTML = `
-  ${i}<br>
-  ${eventText}
-  <span class="deleteBtn">❌</span>
-`;
-  const deleteBtn = day.querySelector(".deleteBtn");
-
-deleteBtn.onclick = function (event) {
-
-  event.stopPropagation();
-
-  delete events[key];
-
-  localStorage.setItem(
-    "calendarEvents",
-    JSON.stringify(events)
-  );
-
-  createDays();
-};
-   if (events[key].includes("exam")) {
-    day.style.background = "red";
-    day.style.color = "white";
-  }
-
-  if (events[key].includes("birthday")) {
-    day.style.background = "pink";
-  }
-
-  if (events[key].includes("meeting")) {
-    day.style.background = "blue";
-    day.style.color = "white";
-  }
-}
-
-day.onclick = function () {
-
-  if (events[key]) {
-
-    let choice = prompt("1 = Edit\n2 = Delete");
-
-    if (choice === "1") {
-
-      let newEvent = prompt("Edit event:", events[key]);
-
-      if (newEvent) {
-        events[key] = newEvent;
-      }
-
-    } else if (choice === "2") {
-
-      delete events[key];
-    }
-
-  } else {
-
-    let userEvent = prompt("Enter event:");
-
-    if (userEvent) {
-      events[key] = userEvent;
-    }
-  }
-
-  localStorage.setItem("calendarEvents", JSON.stringify(events));
-
-  createDays();
-};
-    if (
-  i === today.getDate() &&
-  month === today.getMonth() &&
-  year === today.getFullYear()
- ) {
-  day.style.background = "#22c55e";
-day.style.color = "white";
-day.style.border = "3px solid #facc15";
-day.style.fontWeight = "bold";
-day.style.boxShadow = "0 0 10px rgba(0,0,0,0.2)";
- }
-    daysBox.appendChild(day);
-  }
-}
-updateMonth();
 
 document.getElementById("darkModeBtn").onclick = function () {
-
   document.body.classList.toggle("dark");
 
   if (document.body.classList.contains("dark")) {
-
     localStorage.setItem("darkMode", "on");
-
   } else {
-
     localStorage.setItem("darkMode", "off");
   }
 };
-if (localStorage.getItem("darkMode") === "on") {
 
+if (localStorage.getItem("darkMode") === "on") {
   document.body.classList.add("dark");
 }
 
 document.getElementById("searchInput").oninput = function () {
   createDays();
 };
-function updateClock() {
 
+function updateClock() {
   const now = new Date();
 
   document.getElementById("clock").innerText =
@@ -241,22 +65,18 @@ function updateClock() {
 setInterval(updateClock, 1000);
 
 updateClock();
-document.getElementById("clearBtn").onclick = function () {
 
-  let confirmDelete = confirm(
-    "Delete all events?"
-  );
+document.getElementById("clearBtn").onclick = function () {
+  let confirmDelete = confirm("Delete all events?");
 
   if (confirmDelete) {
-
     localStorage.removeItem("calendarEvents");
-
     events = {};
-
     createDays();
   }
 };
-const today = new Date();
+
+const todayDate = new Date();
 
 document.getElementById("todayText").innerText =
-  today.toDateString();
+  todayDate.toDateString();
