@@ -283,3 +283,25 @@ footer {
     flex-direction: column;
   }
 }
+.calendar-box {
+  padding: 18px;
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+#todayText,
+#clock {
+  margin: 5px 0;
+}
+
+.info-box {
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+.days div {
+  min-height: 55px;
+  padding: 12px;
+}

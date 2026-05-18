@@ -16,9 +16,13 @@ const months = [
     "Heinäkuu", "Elokuu", "Syyskuu", "Lokakuu", "Marraskuu" ,"Joulukuu"
 ];
 const holidays = {
-  "2026-0-1": "🎉 Uusivuosi",
-  "2026-4-1": "🎈 Vappu",
-  "2026-11-25": "🎄 Joulu"
+  "0-1": "🎉 Uusivuosi",
+  "0-6": "✨ Loppiainen",
+  "4-1": "🎈 Vappu",
+  "11-6": "🇫🇮 Itsenäisyyspäivä",
+  "11-24": "🎄 Jouluaatto",
+  "11-25": "🎄 Joulupäivä",
+  "11-26": "🎁 Tapaninpäivä"
 };
 function updateMonth() { 
   document.getElementById("monthTitle").innerText = months[month] + " " + year;
@@ -93,12 +97,13 @@ const searchText = document
   for (let i = 1; i <= daysInMonth; i++) {
     const day = document.createElement("div");
     day.innerText = i;
-   let key = year + "-" + month + "-" + i;
-   if (holidays[key]) {
+   let key = year + "-" + month + "-" + i; 
+   let holidayKey = month + "-" + i;
+   if (holidays[holidayKey]) {
 
   day.innerHTML = `
     ${i}<br>
-    ${holidays[key]}
+    ${holidays[holidayKey]}
   `;
 
   day.style.background = "#fef3c7";
@@ -244,7 +249,7 @@ updateClock();
 document.getElementById("clearBtn").onclick = function () {
 
   let confirmDelete = confirm(
-    "Delete all events?"
+    "Haluatko poista?"
   );
 
   if (confirmDelete) {
@@ -260,3 +265,14 @@ const today = new Date();
 
 document.getElementById("todayText").innerText =
   today.toDateString();
+  document.getElementById("todayBtn").onclick = function () {
+  const now = new Date();
+
+  month = now.getMonth();
+  year = now.getFullYear();
+
+  localStorage.setItem("savedMonth", month);
+  localStorage.setItem("savedYear", year);
+
+  updateMonth();
+};
