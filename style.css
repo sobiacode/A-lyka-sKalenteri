@@ -238,3 +238,48 @@ footer {
   background: #374151;
   color: white;
 }
+.eventText {
+  display: block;
+  font-size: 12px;
+  margin-top: 5px;
+  font-weight: bold;
+}
+.days div {
+  transition: 0.2s;
+}
+
+.days div:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+@media (max-width: 768px) {
+
+  .calendar-box {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .days,
+  .weekdays {
+    gap: 5px;
+  }
+
+  .days div,
+  .weekdays div {
+    min-height: 60px;
+    font-size: 12px;
+  }
+
+  button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  #searchInput {
+    width: 100%;
+  }
+
+  .month-header {
+    flex-direction: column;
+  }
+}
