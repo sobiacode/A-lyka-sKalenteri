@@ -305,3 +305,28 @@ h1 {
   min-height: 55px;
   padding: 12px;
 }
+.blue-theme {
+  background: linear-gradient(to right, #dbeafe, #f0f9ff);
+}
+
+.green-theme {
+  background: linear-gradient(to right, #dcfce7, #f0fdf4);
+}
+
+.purple-theme {
+  background: linear-gradient(to right, #ede9fe, #faf5ff);
+}
+.blue-theme .calendar-box {
+  background: #ffffff;
+}
+
+.green-theme .calendar-box {
+  background: #f0fdf4;
+}
+
+.purple-theme .calendar-box {
+  background: #faf5ff;
+}
+button {
+  margin: 5px;
+}

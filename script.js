@@ -213,7 +213,8 @@ day.style.boxShadow = "0 0 10px rgba(0,0,0,0.2)";
     daysBox.appendChild(day);
   }
 
-  updateEventList();
+ updateEventList();
+updateReminders();
 }
 
 function updateEventList() {
@@ -276,7 +277,59 @@ document.getElementById("meetingCount").innerText =
 document.getElementById("birthdayCount").innerText =
 "Syntymäpäivät: " + birthdayCount;
 }
+function updateReminders() {
 
+  const reminderList =
+    document.getElementById("reminderList");
+
+  reminderList.innerHTML = "";
+
+  const today = new Date();
+
+  Object.keys(events).forEach(function(key) {
+
+    const parts = key.split("-");
+
+    const eventDate = new Date(
+      parts[0],
+      parts[1],
+      parts[2]
+    );
+
+    const difference =
+      Math.ceil(
+        (eventDate - today) /
+        (1000 * 60 * 60 * 24)
+      );
+
+    const li = document.createElement("li");
+
+    if (difference === 0) {
+      li.innerText =
+      "⏰ " + events[key] + " on tänään";
+    }
+
+    else if (difference === 1) {
+      li.innerText =
+      "📅 " + events[key] + " on huomenna";
+    }
+
+    else if (
+      difference > 1 &&
+      difference <= 7
+    ) {
+      li.innerText =
+      "⌛ " + events[key] +
+      " in " + difference +
+      " päivän päästä";
+    }
+
+    if (li.innerText !== "") {
+      reminderList.appendChild(li);
+    }
+
+  });
+}
 updateMonth();
 
 document.getElementById("darkModeBtn").onclick = function () {
@@ -330,7 +383,29 @@ const today = new Date();
 
 document.getElementById("todayText").innerText =
   today.toDateString();
-  document.getElementById("todayBtn").onclick = function () {
+
+document.getElementById("blueTheme").onclick = function () {
+  document.body.className = "blue-theme";
+  localStorage.setItem("theme", "blue-theme");
+};
+
+document.getElementById("greenTheme").onclick = function () {
+  document.body.className = "green-theme";
+  localStorage.setItem("theme", "green-theme");
+};
+
+document.getElementById("purpleTheme").onclick = function () {
+  document.body.className = "purple-theme";
+  localStorage.setItem("theme", "purple-theme");
+};
+
+const savedTheme = localStorage.getItem("theme");
+
+if (savedTheme) {
+  document.body.className = savedTheme;
+}
+
+document.getElementById("todayBtn").onclick = function () {
   const now = new Date();
 
   month = now.getMonth();
