@@ -39,6 +39,7 @@ document.getElementById("prevBtn").onclick = function () {
   localStorage.setItem("savedMonth", month);
   localStorage.setItem("savedYear", year);
 
+
   updateMonth();
 };
 document.getElementById("nextBtn").onclick = function () {
@@ -211,7 +212,71 @@ day.style.boxShadow = "0 0 10px rgba(0,0,0,0.2)";
  }
     daysBox.appendChild(day);
   }
+
+  updateEventList();
 }
+
+function updateEventList() {
+  const eventList =
+    document.getElementById("eventList");
+
+  const eventCount =
+    document.getElementById("eventCount");
+
+  eventList.innerHTML = "";
+
+  const eventKeys = Object.keys(events);
+  let examCount = 0;
+let meetingCount = 0;
+let birthdayCount = 0;
+
+  eventCount.innerText =
+    "Tapahtumia yhteensä: " + eventKeys.length;
+
+  eventKeys.forEach(function (key) {
+    let eventText = events[key].toLowerCase();
+
+if (
+  eventText.includes("exam") ||
+  eventText.includes("koe") ||
+  eventText.includes("kokeet")
+) {
+  examCount++;
+}
+
+if (
+  eventText.includes("meeting") ||
+  eventText.includes("tapaaminen") ||
+  eventText.includes("tapaamiset")
+) {
+  meetingCount++;
+}
+
+if (
+  eventText.includes("birthday") ||
+  eventText.includes("syntymäpäivä")
+) {
+  birthdayCount++;
+}
+
+    const li = document.createElement("li");
+
+    li.innerText =
+      key + " → " + events[key];
+
+    eventList.appendChild(li);
+
+  });
+  document.getElementById("examCount").innerText =
+"Kokeet: " + examCount;
+
+document.getElementById("meetingCount").innerText =
+"Tapaamiset: " + meetingCount;
+
+document.getElementById("birthdayCount").innerText =
+"Syntymäpäivät: " + birthdayCount;
+}
+
 updateMonth();
 
 document.getElementById("darkModeBtn").onclick = function () {
