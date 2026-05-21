@@ -24,10 +24,28 @@ const holidays = {
   "11-25": "🎄 Joulupäivä",
   "11-26": "🎁 Tapaninpäivä"
 };
-function updateMonth() { 
-  document.getElementById("monthTitle").innerText = months[month] + " " + year;
-  createDays();
- }
+function updateMonth() {
+
+  document.getElementById("monthTitle").innerText =
+    months[month] + " " + year;
+
+  const monthImages = [
+    "❄️", // January
+    "❤️", // February
+    "🌷", // March
+    "🌱", // April
+    "🌸", // May
+    "☀️", // June
+    "🏖️", // July
+    "🍉", // August
+    "🍁", // September
+    "🎃", // October
+    "☕", // November
+    "🎄" // December
+  ];
+document.getElementById("monthImage").innerText = monthImages[month];
+ createDays();
+}
 document.getElementById("prevBtn").onclick = function () {
   month--;
 
