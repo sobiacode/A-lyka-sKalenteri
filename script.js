@@ -434,3 +434,134 @@ document.getElementById("todayBtn").onclick = function () {
 
   updateMonth();
 };
+document.getElementById("checkReminderBtn").onclick = function () {
+  const reminderItems =
+    document.querySelectorAll("#reminderList li");
+
+  if (reminderItems.length > 0) {
+    alert("Sinulla on muistutuksia!");
+
+    const sound = new Audio(
+      "https://actions.google.com/sounds/v1/alarms/beep_short.ogg"
+    );
+
+    sound.play();
+  } else {
+    alert("Ei muistutuksia tällä hetkellä.");
+  }
+};
+let timeLeft = 10;
+let timer;
+
+let currentSound;
+
+document.getElementById("startTimerBtn").onclick = function () {
+
+  clearInterval(timer);
+
+  timeLeft = 10;
+
+  timer = setInterval(function () {
+
+    document.getElementById("timerDisplay").innerText =
+      "00:" + (timeLeft < 10 ? "0" : "") + timeLeft;
+
+    timeLeft--;
+
+    if (timeLeft < 0) {
+
+      clearInterval(timer);
+
+ document.getElementById("timerDisplay").innerText =
+"🔔 Reminder time!";
+
+      let selectedSound =
+document.getElementById("soundSelect").value;
+
+let soundUrl = "";
+
+if (selectedSound === "beep") {
+  soundUrl =
+  "https://actions.google.com/sounds/v1/alarms/beep_short.ogg";
+}
+
+else if (selectedSound === "bell") {
+  soundUrl =
+  "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg";
+}
+
+else if (selectedSound === "alarm") {
+  soundUrl =
+  "https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg";
+}
+
+else if (selectedSound === "digital") {
+  soundUrl =
+  "https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg";
+}
+
+else if (selectedSound === "notification") {
+  soundUrl =
+  "https://actions.google.com/sounds/v1/cartoon/pop.ogg";
+}
+
+else if (selectedSound === "ring") {
+  soundUrl =
+  "https://actions.google.com/sounds/v1/alarms/medium_bell_ringing_near.ogg";
+}
+currentSound = new Audio(soundUrl);
+currentSound.play();
+
+  
+    }
+
+  }, 1000);
+
+};
+document.getElementById("pauseTimerBtn").onclick =
+function () {
+
+  clearInterval(timer);
+
+  if (currentSound) {
+    currentSound.pause();
+    currentSound.currentTime = 0;
+  }
+
+  document.getElementById("timerDisplay").innerText =
+  "⏸ Paused";
+};
+
+document.getElementById("snoozeBtn").onclick =
+function () {
+
+  clearInterval(timer);
+
+  if (currentSound) {
+    currentSound.pause();
+    currentSound.currentTime = 0;
+  }
+
+  timeLeft = 5;
+
+  document.getElementById("timerDisplay").innerText =
+  "😴 Snoozed for 5 seconds";
+
+  timer = setInterval(function () {
+
+    document.getElementById("timerDisplay").innerText =
+      "00:" + (timeLeft < 10 ? "0" : "") + timeLeft;
+
+    timeLeft--;
+
+    if (timeLeft < 0) {
+      clearInterval(timer);
+
+      document.getElementById("timerDisplay").innerText =
+        "🔔 Reminder time!";
+
+      document.getElementById("startTimerBtn").click();
+    }
+
+  }, 1000);
+};

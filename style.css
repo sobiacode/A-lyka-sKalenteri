@@ -369,3 +369,42 @@ footer {
   font-weight: bold;
   box-shadow: 0 0 10px rgba(0,0,0,0.2);
 }
+#eventList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+}
+
+#eventList li {
+  background: white;
+  padding: 10px 15px;
+  border-radius: 12px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  font-weight: bold;
+}
+     .dark .calendar-box {
+  background: #1f2937;
+  color: white;
+}
+
+.dark .info-box {
+  background: #374151;
+  color: white;
+}
+
+.dark h1,
+.dark #todayText,
+.dark p {
+  color: white;
+}
+.reminder-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reminder-box button {
+  width: fit-content;
+}

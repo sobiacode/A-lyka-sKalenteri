@@ -46,7 +46,8 @@
 
    <div class="days" id="daysBox"></div>
 
-<div class="event-list-box">
+
+  <div class="event-list-box">
   <h3>Tapahtumalista</h3>
   <p id="eventCount">Tapahtumia yhteensä: 0</p>
   <ul id="eventList"></ul>
@@ -58,9 +59,29 @@
   <p id="meetingCount">Tapaamiset: 0</p>
   <p id="birthdayCount">Syntymäpäivät: 0</p>
 </div>
+
 <div class="reminder-box">
   <h3>Muistutukset</h3>
   <ul id="reminderList"></ul>
+
+  <button id="checkReminderBtn">🔔 Tarkista muistutukset</button>
+
+  <p id="timerDisplay">00:00</p>
+
+  <label for="soundSelect">🔊 Valitse ääni:</label>
+
+  <select id="soundSelect">
+    <option value="beep">Beep</option>
+    <option value="bell">Bell</option>
+    <option value="alarm">Alarm</option>
+    <option value="digital">Digital</option>
+    <option value="notification">Notification</option>
+    <option value="ring">Ring</option>
+  </select>
+
+  <button id="startTimerBtn">▶ Start Timer</button>
+  <button id="pauseTimerBtn">⏸ Pause</button>
+  <button id="snoozeBtn">😴 Snooze +5s</button>
 </div>
 
 </div>
