@@ -5,89 +5,139 @@
   <title>ÄlykäsKalenteri</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
   <div class="calendar-box">
+
     <h1>ÄlykäsKalenteri</h1>
     <h2 id="todayText"></h2>
     <h3 id="clock"></h3>
-<button id="darkModeBtn">Tumma tila</button>
-<button id="clearBtn">Tyhjennä tapahtumat</button>
-<button id="todayBtn">Tänään</button>
-<input type="text" id="searchInput" placeholder="Etsi tapahtumaa">
-<button id="blueTheme">🔵 Blue</button>
-<button id="greenTheme">🟢 Green</button>
-<button id="purpleTheme">🟣 Purple</button>
-<p>Älykäs kalenterisovellus, jossa voi lisätä, etsiä ja poistaa tapahtumia.</p>
+
+    <button id="darkModeBtn">Tumma tila</button>
+    <button id="clearBtn">Tyhjennä tapahtumat</button>
+    <button id="todayBtn">Tänään</button>
+
+    <input type="text" id="searchInput" placeholder="Etsi tapahtumaa">
+
+    <button id="blueTheme">🔵 Blue</button>
+    <button id="greenTheme">🟢 Green</button>
+    <button id="purpleTheme">🟣 Purple</button>
+
+    <p>Älykäs kalenterisovellus, jossa voi lisätä, etsiä ja poistaa tapahtumia.</p>
+
     <div class="info-box">
-    <p>Ominaisuudet: tapahtumat, haku, tumma tila ja juhlapyhät.</p>
-   </div>
-   <div class="month-header">
-  <button id="prevBtn">Edellinen</button>
-
-  <div>
-    <div id="monthImage"></div>
-    <h2 id="monthTitle">Huhtikuu 2026</h2>
-  </div>
-
-  <button id="nextBtn">Seuraava</button>
-</div>
-
-    <div class="weekdays">
-      <div>Ma</div>
-      <div>Ti</div>
-      <div>Ke</div>
-      <div>To</div>
-      <div>Pe</div>
-      <div>La</div>
-      <div>Su</div>
+      <p>Ominaisuudet: tapahtumat, haku, tumma tila ja juhlapyhät.</p>
     </div>
 
+    <div class="month-header">
+      <button id="prevBtn">Edellinen</button>
 
-   <div class="days" id="daysBox"></div>
+      <div class="month-area">
+        <img id="seasonImage"
+             src="https://cdn-icons-png.flaticon.com/512/869/869869.png"
+             width="50">
 
+        <div id="monthImage"></div>
 
-  <div class="event-list-box">
-  <h3>Tapahtumalista</h3>
-  <p id="eventCount">Tapahtumia yhteensä: 0</p>
-  <ul id="eventList"></ul>
-</div>
+        <h2 id="monthTitle">Huhtikuu 2026</h2>
 
-<div class="stats-box">
-  <h3>Tilastot</h3>
-  <p id="examCount">Kokeet: 0</p>
-  <p id="meetingCount">Tapaamiset: 0</p>
-  <p id="birthdayCount">Syntymäpäivät: 0</p>
-</div>
+        <div class="quote-box">
+          <p id="quoteText">🌟 Success is the sum of small efforts repeated daily.</p>
+        </div>
+      </div>
 
-<div class="reminder-box">
-  <h3>Muistutukset</h3>
-  <ul id="reminderList"></ul>
+      <button id="nextBtn">Seuraava</button>
+    </div>
 
-  <button id="checkReminderBtn">🔔 Tarkista muistutukset</button>
+    <div class="main-layout">
 
-  <p id="timerDisplay">00:00</p>
+      <div class="left-panel">
 
-  <label for="soundSelect">🔊 Valitse ääni:</label>
+        <div class="event-list-box">
+         <h3>📅 Tapahtumalista</h3> 
+          <p id="currentDate">26 May 2026</p>
+          <p id="eventCount">Tapahtumia yhteensä: 0</p>
+          <ul id="eventList"></ul>
+        </div>
 
-  <select id="soundSelect">
-    <option value="beep">Beep</option>
-    <option value="bell">Bell</option>
-    <option value="alarm">Alarm</option>
-    <option value="digital">Digital</option>
-    <option value="notification">Notification</option>
-    <option value="ring">Ring</option>
-  </select>
+        <div class="map-box">
+          <h3>📍 Sijainti</h3>
+          <p>Pori, Finland</p>
 
-  <button id="startTimerBtn">▶ Start Timer</button>
-  <button id="pauseTimerBtn">⏸ Pause</button>
-  <button id="snoozeBtn">😴 Snooze +5s</button>
-</div>
+          <iframe
+            src="https://www.google.com/maps?q=Pori,Finland&output=embed"
+            width="100%"
+            height="180"
+            style="border:0; border-radius:12px;"
+            loading="lazy">
+          </iframe>
+        </div>
 
-</div>
+      </div>
+
+      <div class="calendar-main">
+
+        <div class="weekdays">
+          <div>Ma</div>
+          <div>Ti</div>
+          <div>Ke</div>
+          <div>To</div>
+          <div>Pe</div>
+          <div>La</div>
+          <div>Su</div>
+        </div>
+
+        <div class="days" id="daysBox"></div>
+
+      </div>
+
+      <div class="right-panel">
+
+        <div class="stats-box">
+          <h3>Tilastot</h3>
+          <p id="currentTime">13:30</p>
+          <p id="examCount">Kokeet: 0</p>
+          <p id="meetingCount">Tapaamiset: 0</p>
+          <p id="birthdayCount">Syntymäpäivät: 0</p>
+        </div>
+
+        <div class="reminder-box">
+          <h3>Muistutukset</h3>
+          <ul id="reminderList"></ul>
+
+          <button id="checkReminderBtn">🔔 Tarkista muistutukset</button>
+
+          <p id="timerDisplay">00:00</p>
+
+          <label for="soundSelect">🔊 Valitse ääni:</label>
+
+          <select id="soundSelect">
+            <option value="beep">Beep</option>
+            <option value="bell">Bell</option>
+            <option value="alarm">Alarm</option>
+            <option value="digital">Digital</option>
+            <option value="notification">Notification</option>
+            <option value="ring">Ring</option>
+          </select>
+
+          <div class="timer-controls">
+            <button id="startTimerBtn">▶ Start Timer</button>
+            <button id="pauseTimerBtn">⏸ Pause</button>
+            <button id="snoozeBtn">😴 Snooze +5s</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
   <footer>
-  <p>💙 © 2026 Sobia – ÄlykäsKalenteri | Smart Calendar Project</p>
-</footer>
+    <p>💙 © 2026 Sobia – ÄlykäsKalenteri | Smart Calendar Project</p>
+  </footer>
+
   <script src="script.js"></script>
 
 </body>

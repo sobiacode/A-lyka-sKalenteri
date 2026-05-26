@@ -1,20 +1,20 @@
 let events = JSON.parse(localStorage.getItem("calendarEvents")) || {};
 const currentDate = new Date();
 
-let month =
-  localStorage.getItem("savedMonth") !== null
-    ? Number(localStorage.getItem("savedMonth"))
-    : currentDate.getMonth();
+let month = localStorage.getItem("savedMonth") !== null
+  ? Number(localStorage.getItem("savedMonth"))
+  : currentDate.getMonth();
 
-let year =
-  localStorage.getItem("savedYear") !== null
-    ? Number(localStorage.getItem("savedYear"))
-    : currentDate.getFullYear();
+let year = localStorage.getItem("savedYear") !== null
+  ? Number(localStorage.getItem("savedYear"))
+  : currentDate.getFullYear();
 
 const months = [
-    "Tammikuu", "Helmikuu", "Maaliskuu", "Huhtikuu", "Toukokuu", "Kesäkuu", 
-    "Heinäkuu", "Elokuu", "Syyskuu", "Lokakuu", "Marraskuu" ,"Joulukuu"
+  "Tammikuu", "Helmikuu", "Maaliskuu", "Huhtikuu",
+  "Toukokuu", "Kesäkuu", "Heinäkuu", "Elokuu",
+  "Syyskuu", "Lokakuu", "Marraskuu", "Joulukuu"
 ];
+
 const holidays = {
   "0-1": "🎉 Uusivuosi",
   "0-6": "✨ Loppiainen",
@@ -24,66 +24,31 @@ const holidays = {
   "11-25": "🎄 Joulupäivä",
   "11-26": "🎁 Tapaninpäivä"
 };
-function updateMonth() {
 
-  document.getElementById("monthTitle").innerText =
-    months[month] + " " + year;
-
-  const monthImages = [
-    "❄️", // January
-    "❤️", // February
-    "🌷", // March
-    "🌱", // April
-    "🌸", // May
-    "☀️", // June
-    "🏖️", // July
-    "🍉", // August
-    "🍁", // September
-    "🎃", // October
-    "☕", // November
-    "🎄" // December
-  ];
-document.getElementById("monthImage").innerText = monthImages[month];
- createDays();
-}
-document.getElementById("prevBtn").onclick = function () {
-  month--;
-
-  if (month < 0) {
-    month = 11;
-    year--;
-  }
-
-  localStorage.setItem("savedMonth", month);
-  localStorage.setItem("savedYear", year);
-
-
-  updateMonth();
-};
-document.getElementById("nextBtn").onclick = function () {
-  month++;
-
-  if (month > 11) {
-    month = 0;
-    year++;
-  }
-
-  localStorage.setItem("savedMonth", month);
-  localStorage.setItem("savedYear", year);
-
-  updateMonth();
-};
 const daysBox = document.getElementById("daysBox");
+
+function getEventsForDay(key) {
+  if (!events[key]) return [];
+
+  if (Array.isArray(events[key])) {
+    return events[key];
+  }
+
+  return [events[key]];
+}
+
+function saveEvents() {
+  localStorage.setItem("calendarEvents", JSON.stringify(events));
+}
+
 function getDaysInMonth(month, year) {
-  // February
   if (month === 1) {
-    if ((year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)) {
+    if ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) {
       return 29;
     }
     return 28;
   }
 
-  // April, June, September, November
   if (month === 3 || month === 5 || month === 8 || month === 10) {
     return 30;
   }
@@ -91,14 +56,27 @@ function getDaysInMonth(month, year) {
   return 31;
 }
 
+function updateMonth() {
+  document.getElementById("monthTitle").innerText =
+    months[month] + " " + year;
+
+  const monthImages = [
+    "❄️", "❤️", "🌷", "🌱", "🌸", "☀️",
+    "🏖️", "🍉", "🍁", "🎃", "☕", "🎄"
+  ];
+
+  document.getElementById("monthImage").innerText = monthImages[month];
+
+  createDays();
+}
+
 function createDays() {
   daysBox.innerHTML = "";
-const searchText = document
-  .getElementById("searchInput")
-  .value
-  .toLowerCase();
-  const today = new Date();
 
+  const searchText =
+    document.getElementById("searchInput").value.toLowerCase();
+
+  const today = new Date();
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = getDaysInMonth(month, year);
 
@@ -115,188 +93,231 @@ const searchText = document
 
   for (let i = 1; i <= daysInMonth; i++) {
     const day = document.createElement("div");
-    day.innerText = i;
-   let key = year + "-" + month + "-" + i; 
-   let holidayKey = month + "-" + i;
-   if (holidays[holidayKey]) {
 
-  day.innerHTML = `
-    ${i}<br>
-    ${holidays[holidayKey]}
-  `;
+    const key = year + "-" + month + "-" + i;
+    const holidayKey = month + "-" + i;
 
-  day.style.background = "#fef3c7";
-  day.style.fontWeight = "bold";
-  day.style.color = "#92400e";
-}
-if (events[key]) {
-  if (
-  searchText &&
-  !events[key].toLowerCase().includes(searchText)
-) {
-  continue;
-}
-  let eventText = events[key];
+    day.innerHTML = i;
 
-if (eventText.includes("exam")) {
-  eventText = "📚 " + eventText;
-}
+    if (
+      i === today.getDate() &&
+      month === today.getMonth() &&
+      year === today.getFullYear()
+    ) {
+      day.classList.add("today-circle");
+    }
 
-if (eventText.includes("birthday")) {
-  eventText = "🎂 " + eventText;
-}
+    if (holidays[holidayKey]) {
+      day.innerHTML = i + "<br>" + holidays[holidayKey];
+      day.style.background = "#fef3c7";
+      day.style.fontWeight = "bold";
+      day.style.color = "#92400e";
+    }
 
-if (eventText.includes("meeting")) {
-  eventText = "💼 " + eventText;
-}
+    const dayEvents = getEventsForDay(key);
 
-day.innerHTML = `
-  ${i}<br>
-  ${eventText}
-  <span class="deleteBtn">❌</span>
-`;
-  const deleteBtn = day.querySelector(".deleteBtn");
+    if (dayEvents.length > 0) {
+      const allText = dayEvents.join(" ").toLowerCase();
 
-deleteBtn.onclick = function (event) {
+      if (!searchText || allText.includes(searchText)) {
+        let eventHtml = "";
 
-  event.stopPropagation();
+        dayEvents.forEach(function (item) {
+          let icon = "• ";
 
-  delete events[key];
+          if (
+            item.toLowerCase().includes("exam") ||
+            item.toLowerCase().includes("koe")
+          ) {
+            icon = "📚 ";
+          }
 
-  localStorage.setItem(
-    "calendarEvents",
-    JSON.stringify(events)
-  );
+          else if (item.toLowerCase().includes("birthday")) {
+            icon = "🎂 ";
+          }
 
-  createDays();
-};
-   if (events[key].includes("exam")) {
-    day.style.background = "red";
-    day.style.color = "white";
-  }
+          else if (item.toLowerCase().includes("meeting")) {
+            icon = "💼 ";
+          }
 
-  if (events[key].includes("birthday")) {
-    day.style.background = "pink";
-  }
+          eventHtml += "<small>" + icon + item + "</small><br>";
+        });
 
-  if (events[key].includes("meeting")) {
-    day.style.background = "blue";
-    day.style.color = "white";
-  }
-}
+        day.innerHTML =
+          i +
+          "<br>" +
+          eventHtml +
+          '<span class="deleteBtn">❌</span>';
 
-day.onclick = function () {
+        const deleteBtn = day.querySelector(".deleteBtn");
 
-  if (events[key]) {
+        deleteBtn.onclick = function (event) {
+          event.stopPropagation();
 
-    let choice = prompt("1 = Edit\n2 = Delete");
+          delete events[key];
+          saveEvents();
+          createDays();
+        };
 
-    if (choice === "1") {
+        if (allText.includes("exam") || allText.includes("koe")) {
+          day.style.background = "#fef2f2";
+          day.style.color = "#111827";
+        }
 
-      let newEvent = prompt("Edit event:", events[key]);
+        if (allText.includes("birthday")) {
+          day.style.background = "#fce7f3";
+        }
 
-      if (newEvent) {
-        events[key] = newEvent;
+        if (allText.includes("meeting")) {
+          day.style.background = "#dbeafe";
+          day.style.color = "#111827";
+        }
+      }
+    }
+
+    day.onclick = function () {
+      if (events[key]) {
+        let choice = prompt(
+          "1 = Add new event\n2 = Edit all events\n3 = Delete all events"
+        );
+
+        if (choice === "1") {
+          addEventToDay(key);
+        }
+
+        else if (choice === "2") {
+          let currentEvents = getEventsForDay(key).join("\n");
+
+          let editedEvents = prompt(
+            "Edit events. Put each event on a new line:",
+            currentEvents
+          );
+
+          if (editedEvents) {
+            events[key] = editedEvents
+              .split("\n")
+              .filter(function (item) {
+                return item.trim() !== "";
+              });
+          }
+        }
+
+        else if (choice === "3") {
+          delete events[key];
+        }
       }
 
-    } else if (choice === "2") {
+      else {
+        addEventToDay(key);
+      }
 
-      delete events[key];
-    }
+      saveEvents();
+      createDays();
+    };
 
-  } else {
-
-    let userEvent = prompt("Enter event:");
-
-    if (userEvent) {
-      events[key] = userEvent;
-    }
-  }
-
-  localStorage.setItem("calendarEvents", JSON.stringify(events));
-
-  createDays();
-};
-    if (
-  i === today.getDate() &&
-  month === today.getMonth() &&
-  year === today.getFullYear()
- ) {
-  day.style.background = "#22c55e";
-day.style.color = "white";
-day.style.border = "3px solid #facc15";
-day.style.fontWeight = "bold";
-day.style.boxShadow = "0 0 10px rgba(0,0,0,0.2)";
- }
     daysBox.appendChild(day);
   }
 
- updateEventList();
-updateReminders();
+  updateEventList();
+  updateReminders();
+}
+
+function addEventToDay(key) {
+  let userEvent = prompt("Enter event:");
+
+  if (userEvent) {
+    let description = prompt("Enter note / description:");
+
+    let finalEvent = "";
+
+    if (description) {
+      finalEvent = userEvent + " - " + description;
+    } else {
+      finalEvent = userEvent;
+    }
+
+    if (!events[key]) {
+      events[key] = [];
+    }
+
+    if (!Array.isArray(events[key])) {
+      events[key] = [events[key]];
+    }
+
+    events[key].push(finalEvent);
+  }
 }
 
 function updateEventList() {
-  const eventList =
-    document.getElementById("eventList");
-
-  const eventCount =
-    document.getElementById("eventCount");
+  const eventList = document.getElementById("eventList");
+  const eventCount = document.getElementById("eventCount");
 
   eventList.innerHTML = "";
 
   const eventKeys = Object.keys(events);
-  let examCount = 0;
-let meetingCount = 0;
-let birthdayCount = 0;
 
-  eventCount.innerText =
-    "Tapahtumia yhteensä: " + eventKeys.length;
+  let examCount = 0;
+  let meetingCount = 0;
+  let birthdayCount = 0;
+  let totalEvents = 0;
 
   eventKeys.forEach(function (key) {
-    let eventText = events[key].toLowerCase();
+    const dayEvents = getEventsForDay(key);
 
-if (
-  eventText.includes("exam") ||
-  eventText.includes("koe") ||
-  eventText.includes("kokeet")
-) {
-  examCount++;
-}
+    dayEvents.forEach(function (item) {
+      totalEvents++;
 
-if (
-  eventText.includes("meeting") ||
-  eventText.includes("tapaaminen") ||
-  eventText.includes("tapaamiset")
-) {
-  meetingCount++;
-}
+      let eventText = item.toLowerCase();
 
-if (
-  eventText.includes("birthday") ||
-  eventText.includes("syntymäpäivä")
-) {
-  birthdayCount++;
-}
+      if (
+        eventText.includes("exam") ||
+        eventText.includes("koe") ||
+        eventText.includes("kokeet")
+      ) {
+        examCount++;
+      }
 
-    const li = document.createElement("li");
+      if (
+        eventText.includes("meeting") ||
+        eventText.includes("tapaaminen") ||
+        eventText.includes("tapaamiset")
+      ) {
+        meetingCount++;
+      }
 
-    li.innerText =
-      key + " → " + events[key];
+      if (
+        eventText.includes("birthday") ||
+        eventText.includes("syntymäpäivä")
+      ) {
+        birthdayCount++;
+      }
 
-    eventList.appendChild(li);
+      const li = document.createElement("li");
 
+      const parts = key.split("-");
+      const displayDate =
+        parts[0] + "-" + (Number(parts[1]) + 1) + "-" + parts[2];
+
+      li.innerText = displayDate + " → " + item;
+
+      eventList.appendChild(li);
+    });
   });
+
+  eventCount.innerText =
+    "Tapahtumia yhteensä: " + totalEvents;
+
   document.getElementById("examCount").innerText =
-"Kokeet: " + examCount;
+    "Kokeet: " + examCount;
 
-document.getElementById("meetingCount").innerText =
-"Tapaamiset: " + meetingCount;
+  document.getElementById("meetingCount").innerText =
+    "Tapaamiset: " + meetingCount;
 
-document.getElementById("birthdayCount").innerText =
-"Syntymäpäivät: " + birthdayCount;
+  document.getElementById("birthdayCount").innerText =
+    "Syntymäpäivät: " + birthdayCount;
 }
-function updateReminders() {
 
+function updateReminders() {
   const reminderList =
     document.getElementById("reminderList");
 
@@ -304,8 +325,7 @@ function updateReminders() {
 
   const today = new Date();
 
-  Object.keys(events).forEach(function(key) {
-
+  Object.keys(events).forEach(function (key) {
     const parts = key.split("-");
 
     const eventDate = new Date(
@@ -320,83 +340,125 @@ function updateReminders() {
         (1000 * 60 * 60 * 24)
       );
 
-    const li = document.createElement("li");
+    const dayEvents = getEventsForDay(key);
 
-    if (difference === 0) {
-      li.innerText =
-      "⏰ " + events[key] + " on tänään";
-    }
+    dayEvents.forEach(function (item) {
+      const li = document.createElement("li");
 
-    else if (difference === 1) {
-      li.innerText =
-      "📅 " + events[key] + " on huomenna";
-    }
+      if (difference === 0) {
+        li.innerText =
+          "⏰ " + item + " on tänään";
+      }
 
-    else if (
-      difference > 1 &&
-      difference <= 7
-    ) {
-      li.innerText =
-      "⌛ " + events[key] +
-      " in " + difference +
-      " päivän päästä";
-    }
+      else if (difference === 1) {
+        li.innerText =
+          "📅 " + item + " on huomenna";
+      }
 
-    if (li.innerText !== "") {
-      reminderList.appendChild(li);
-    }
+      else if (difference > 1 && difference <= 7) {
+        li.innerText =
+          "⌛ " + item +
+          " in " + difference +
+          " päivän päästä";
+      }
 
+      if (li.innerText !== "") {
+        reminderList.appendChild(li);
+      }
+    });
   });
 }
-updateMonth();
 
-document.getElementById("darkModeBtn").onclick = function () {
+document.getElementById("prevBtn").onclick = function () {
+  month--;
 
-  document.body.classList.toggle("dark");
-
-  if (document.body.classList.contains("dark")) {
-
-    localStorage.setItem("darkMode", "on");
-
-  } else {
-
-    localStorage.setItem("darkMode", "off");
+  if (month < 0) {
+    month = 11;
+    year--;
   }
-};
-if (localStorage.getItem("darkMode") === "on") {
 
-  document.body.classList.add("dark");
-}
+  localStorage.setItem("savedMonth", month);
+  localStorage.setItem("savedYear", year);
+
+  updateMonth();
+};
+
+document.getElementById("nextBtn").onclick = function () {
+  month++;
+
+  if (month > 11) {
+    month = 0;
+    year++;
+  }
+
+  localStorage.setItem("savedMonth", month);
+  localStorage.setItem("savedYear", year);
+
+  updateMonth();
+};
+
+document.getElementById("todayBtn").onclick = function () {
+  const now = new Date();
+
+  month = now.getMonth();
+  year = now.getFullYear();
+
+  localStorage.setItem("savedMonth", month);
+  localStorage.setItem("savedYear", year);
+
+  updateMonth();
+};
 
 document.getElementById("searchInput").oninput = function () {
   createDays();
 };
-function updateClock() {
 
+function updateClock() {
   const now = new Date();
 
+  let timeString = now.toLocaleTimeString();
+
   document.getElementById("clock").innerText =
-    now.toLocaleTimeString();
+    timeString;
+
+  document.getElementById("currentTime").innerText =
+    timeString;
+
+  document.getElementById("currentDate").innerText =
+    now.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
 }
 
 setInterval(updateClock, 1000);
-
 updateClock();
-document.getElementById("clearBtn").onclick = function () {
 
-  let confirmDelete = confirm(
-    "Haluatko poista?"
-  );
+document.getElementById("clearBtn").onclick = function () {
+  let confirmDelete = confirm("Haluatko poistaa?");
 
   if (confirmDelete) {
-
     localStorage.removeItem("calendarEvents");
-
     events = {};
-
     createDays();
   }
 };
+
+document.getElementById("darkModeBtn").onclick = function () {
+  document.body.classList.toggle("dark");
+
+  if (document.body.classList.contains("dark")) {
+    localStorage.setItem("darkMode", "on");
+  } else {
+    localStorage.setItem("darkMode", "off");
+  }
+};
+
+if (localStorage.getItem("darkMode") === "on") {
+  document.body.classList.add("dark");
+}
+
 const today = new Date();
 
 document.getElementById("todayText").innerText =
@@ -423,17 +485,6 @@ if (savedTheme) {
   document.body.className = savedTheme;
 }
 
-document.getElementById("todayBtn").onclick = function () {
-  const now = new Date();
-
-  month = now.getMonth();
-  year = now.getFullYear();
-
-  localStorage.setItem("savedMonth", month);
-  localStorage.setItem("savedYear", year);
-
-  updateMonth();
-};
 document.getElementById("checkReminderBtn").onclick = function () {
   const reminderItems =
     document.querySelectorAll("#reminderList li");
@@ -450,105 +501,46 @@ document.getElementById("checkReminderBtn").onclick = function () {
     alert("Ei muistutuksia tällä hetkellä.");
   }
 };
+
 let timeLeft = 10;
 let timer;
-
 let currentSound;
 
-document.getElementById("startTimerBtn").onclick = function () {
+function getSoundUrl() {
+  let selectedSound =
+    document.getElementById("soundSelect").value;
 
+  if (selectedSound === "beep") {
+    return "https://actions.google.com/sounds/v1/alarms/beep_short.ogg";
+  }
+
+  if (selectedSound === "bell") {
+    return "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg";
+  }
+
+  if (selectedSound === "alarm") {
+    return "https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg";
+  }
+
+  if (selectedSound === "digital") {
+    return "https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg";
+  }
+
+  if (selectedSound === "notification") {
+    return "https://actions.google.com/sounds/v1/cartoon/pop.ogg";
+  }
+
+  if (selectedSound === "ring") {
+    return "https://actions.google.com/sounds/v1/alarms/medium_bell_ringing_near.ogg";
+  }
+}
+
+document.getElementById("startTimerBtn").onclick = function () {
   clearInterval(timer);
 
   timeLeft = 10;
 
   timer = setInterval(function () {
-
-    document.getElementById("timerDisplay").innerText =
-      "00:" + (timeLeft < 10 ? "0" : "") + timeLeft;
-
-    timeLeft--;
-
-    if (timeLeft < 0) {
-
-      clearInterval(timer);
-
- document.getElementById("timerDisplay").innerText =
-"🔔 Reminder time!";
-
-      let selectedSound =
-document.getElementById("soundSelect").value;
-
-let soundUrl = "";
-
-if (selectedSound === "beep") {
-  soundUrl =
-  "https://actions.google.com/sounds/v1/alarms/beep_short.ogg";
-}
-
-else if (selectedSound === "bell") {
-  soundUrl =
-  "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg";
-}
-
-else if (selectedSound === "alarm") {
-  soundUrl =
-  "https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg";
-}
-
-else if (selectedSound === "digital") {
-  soundUrl =
-  "https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg";
-}
-
-else if (selectedSound === "notification") {
-  soundUrl =
-  "https://actions.google.com/sounds/v1/cartoon/pop.ogg";
-}
-
-else if (selectedSound === "ring") {
-  soundUrl =
-  "https://actions.google.com/sounds/v1/alarms/medium_bell_ringing_near.ogg";
-}
-currentSound = new Audio(soundUrl);
-currentSound.play();
-
-  
-    }
-
-  }, 1000);
-
-};
-document.getElementById("pauseTimerBtn").onclick =
-function () {
-
-  clearInterval(timer);
-
-  if (currentSound) {
-    currentSound.pause();
-    currentSound.currentTime = 0;
-  }
-
-  document.getElementById("timerDisplay").innerText =
-  "⏸ Paused";
-};
-
-document.getElementById("snoozeBtn").onclick =
-function () {
-
-  clearInterval(timer);
-
-  if (currentSound) {
-    currentSound.pause();
-    currentSound.currentTime = 0;
-  }
-
-  timeLeft = 5;
-
-  document.getElementById("timerDisplay").innerText =
-  "😴 Snoozed for 5 seconds";
-
-  timer = setInterval(function () {
-
     document.getElementById("timerDisplay").innerText =
       "00:" + (timeLeft < 10 ? "0" : "") + timeLeft;
 
@@ -560,8 +552,53 @@ function () {
       document.getElementById("timerDisplay").innerText =
         "🔔 Reminder time!";
 
-      document.getElementById("startTimerBtn").click();
+      currentSound = new Audio(getSoundUrl());
+      currentSound.play();
     }
-
   }, 1000);
 };
+
+document.getElementById("pauseTimerBtn").onclick = function () {
+  clearInterval(timer);
+
+  if (currentSound) {
+    currentSound.pause();
+    currentSound.currentTime = 0;
+  }
+
+  document.getElementById("timerDisplay").innerText =
+    "⏸ Paused";
+};
+
+document.getElementById("snoozeBtn").onclick = function () {
+  clearInterval(timer);
+
+  if (currentSound) {
+    currentSound.pause();
+    currentSound.currentTime = 0;
+  }
+
+  timeLeft = 5;
+
+  document.getElementById("timerDisplay").innerText =
+    "😴 Snoozed for 5 seconds";
+
+  timer = setInterval(function () {
+    document.getElementById("timerDisplay").innerText =
+      "00:" + (timeLeft < 10 ? "0" : "") + timeLeft;
+
+    timeLeft--;
+
+    if (timeLeft < 0) {
+      clearInterval(timer);
+
+      document.getElementById("timerDisplay").innerText =
+        "🔔 Reminder time!";
+
+      currentSound = new Audio(getSoundUrl());
+      currentSound.play();
+    }
+  }, 1000);
+};
+
+updateMonth();
