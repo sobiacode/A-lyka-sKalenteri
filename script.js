@@ -26,6 +26,7 @@ const holidays = {
 };
 
 const daysBox = document.getElementById("daysBox");
+let selectedKey = null;
 
 function getEventsForDay(key) {
   if (!events[key]) return [];
@@ -79,6 +80,10 @@ function createDays() {
   const today = new Date();
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = getDaysInMonth(month, year);
+let totalEvents = 0;
+let examCount = 0;
+let meetingCount = 0;
+let birthdayCount = 0;
 
   let emptyBoxes = firstDay - 1;
 
@@ -123,22 +128,27 @@ function createDays() {
         let eventHtml = "";
 
         dayEvents.forEach(function (item) {
+          totalEvents++;
+
           let icon = "• ";
 
-          if (
-            item.toLowerCase().includes("exam") ||
-            item.toLowerCase().includes("koe")
-          ) {
-            icon = "📚 ";
-          }
+         if (
+           item.toLowerCase().includes("exam") ||
+           item.toLowerCase().includes("koe")
+ ) {
+  icon = "📚 ";
+  examCount++;
+}
 
-          else if (item.toLowerCase().includes("birthday")) {
-            icon = "🎂 ";
-          }
+else if (item.toLowerCase().includes("birthday")) {
+  icon = "🎂 ";
+  birthdayCount++;
+}
 
-          else if (item.toLowerCase().includes("meeting")) {
-            icon = "💼 ";
-          }
+else if (item.toLowerCase().includes("meeting")) {
+  icon = "💼 ";
+  meetingCount++;
+}
 
           eventHtml += "<small>" + icon + item + "</small><br>";
         });
@@ -167,145 +177,28 @@ function createDays() {
         if (allText.includes("birthday")) {
           day.style.background = "#fce7f3";
         }
-
         if (allText.includes("meeting")) {
           day.style.background = "#dbeafe";
           day.style.color = "#111827";
         }
       }
     }
+ day.onclick = function () {
+  selectedKey = key;  
 
-    day.onclick = function () {
-      if (events[key]) {
-        let choice = prompt(
-          "1 = Add new event\n2 = Edit all events\n3 = Delete all events"
-        );
-
-        if (choice === "1") {
-          addEventToDay(key);
-        }
-
-        else if (choice === "2") {
-          let currentEvents = getEventsForDay(key).join("\n");
-
-          let editedEvents = prompt(
-            "Edit events. Put each event on a new line:",
-            currentEvents
-          );
-
-          if (editedEvents) {
-            events[key] = editedEvents
-              .split("\n")
-              .filter(function (item) {
-                return item.trim() !== "";
-              });
-          }
-        }
-
-        else if (choice === "3") {
-          delete events[key];
-        }
-      }
-
-      else {
-        addEventToDay(key);
-      }
-
-      saveEvents();
-      createDays();
-    };
-
-    daysBox.appendChild(day);
-  }
-
-  updateEventList();
-  updateReminders();
-}
-
-function addEventToDay(key) {
-  let userEvent = prompt("Enter event:");
-
-  if (userEvent) {
-    let description = prompt("Enter note / description:");
-
-    let finalEvent = "";
-
-    if (description) {
-      finalEvent = userEvent + " - " + description;
-    } else {
-      finalEvent = userEvent;
-    }
-
-    if (!events[key]) {
-      events[key] = [];
-    }
-
-    if (!Array.isArray(events[key])) {
-      events[key] = [events[key]];
-    }
-
-    events[key].push(finalEvent);
-  }
-}
-
-function updateEventList() {
-  const eventList = document.getElementById("eventList");
-  const eventCount = document.getElementById("eventCount");
-
-  eventList.innerHTML = "";
-
-  const eventKeys = Object.keys(events);
-
-  let examCount = 0;
-  let meetingCount = 0;
-  let birthdayCount = 0;
-  let totalEvents = 0;
-
-  eventKeys.forEach(function (key) {
-    const dayEvents = getEventsForDay(key);
-
-    dayEvents.forEach(function (item) {
-      totalEvents++;
-
-      let eventText = item.toLowerCase();
-
-      if (
-        eventText.includes("exam") ||
-        eventText.includes("koe") ||
-        eventText.includes("kokeet")
-      ) {
-        examCount++;
-      }
-
-      if (
-        eventText.includes("meeting") ||
-        eventText.includes("tapaaminen") ||
-        eventText.includes("tapaamiset")
-      ) {
-        meetingCount++;
-      }
-
-      if (
-        eventText.includes("birthday") ||
-        eventText.includes("syntymäpäivä")
-      ) {
-        birthdayCount++;
-      }
-
-      const li = document.createElement("li");
-
-      const parts = key.split("-");
-      const displayDate =
-        parts[0] + "-" + (Number(parts[1]) + 1) + "-" + parts[2];
-
-      li.innerText = displayDate + " → " + item;
-
-      eventList.appendChild(li);
-    });
+  document.querySelectorAll(".days div").forEach(function (box) {
+    box.classList.remove("selected-day");
   });
 
-  eventCount.innerText =
-    "Tapahtumia yhteensä: " + totalEvents;
+  day.classList.add("selected-day");
+};
+    daysBox.appendChild(day);
+    
+        }
+      
+
+  document.getElementById("eventCount").innerText =
+  "Tapahtumia yhteensä: " + totalEvents;
 
   document.getElementById("examCount").innerText =
     "Kokeet: " + examCount;
@@ -411,6 +304,37 @@ document.getElementById("todayBtn").onclick = function () {
 
 document.getElementById("searchInput").oninput = function () {
   createDays();
+};
+document.getElementById("saveEventBtn").onclick = function () {
+  if (!selectedKey) {
+    alert("Valitse ensin päivä.");
+    return;
+  }
+
+  const eventInput = document.getElementById("eventInput");
+  const categorySelect = document.getElementById("categorySelect");
+
+  const eventName = eventInput.value.trim();
+  const category = categorySelect.value;
+
+  if (eventName === "") {
+    alert("Kirjoita tapahtuman nimi.");
+    return;
+  }
+
+  const finalEvent = category + ": " + eventName;
+
+  if (!events[selectedKey]) {
+    events[selectedKey] = [];
+  }
+
+  events[selectedKey].push(finalEvent);
+
+  saveEvents();
+  createDays();
+  updateReminders();
+
+  eventInput.value = "";
 };
 
 function updateClock() {

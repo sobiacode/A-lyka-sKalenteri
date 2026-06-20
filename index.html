@@ -87,8 +87,24 @@
           <div>La</div>
           <div>Su</div>
         </div>
-
         <div class="days" id="daysBox"></div>
+        <div id="eventForm" class="event-form">
+
+  <input
+    type="text"
+    id="eventInput"
+    placeholder="Tapahtuman nimi">
+
+  <select id="categorySelect">
+    <option value="General">General</option>
+    <option value="Exam">Koe</option>
+    <option value="Meeting">Tapaaminen</option>
+    <option value="Birthday">Syntymäpäivä</option>
+  </select>
+
+  <button id="saveEventBtn">➕</button>
+
+</div>
 
       </div>
 
@@ -96,7 +112,7 @@
 
         <div class="stats-box">
           <h3>Tilastot</h3>
-          <p id="currentTime">13:30</p>
+          <p id="currentTime"></p>
           <p id="examCount">Kokeet: 0</p>
           <p id="meetingCount">Tapaamiset: 0</p>
           <p id="birthdayCount">Syntymäpäivät: 0</p>
