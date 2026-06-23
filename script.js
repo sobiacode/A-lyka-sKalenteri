@@ -91,13 +91,13 @@ let birthdayCount = 0;
     emptyBoxes = 6;
   }
 
-  for (let i = 0; i < emptyBoxes; i++) {
-    const emptyDay = document.createElement("div");
-    daysBox.appendChild(emptyDay);
-  }
+for (let i = 0; i < emptyBoxes; i++) {
+  const emptyDay = document.createElement("div");
+  daysBox.appendChild(emptyDay);
+}
 
   for (let i = 1; i <= daysInMonth; i++) {
-    const day = document.createElement("div");
+  const day = document.createElement("div");
 
     const key = year + "-" + month + "-" + i;
     const holidayKey = month + "-" + i;
