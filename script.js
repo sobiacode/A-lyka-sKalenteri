@@ -56,6 +56,26 @@ function getDaysInMonth(month, year) {
 
   return 31;
 }
+function getWeekNumber(date) {
+  const tempDate = new Date(date.getTime());
+  tempDate.setHours(0, 0, 0, 0);
+
+  tempDate.setDate(
+    tempDate.getDate() + 3 - ((tempDate.getDay() + 6) % 7)
+  );
+
+  const week1 = new Date(tempDate.getFullYear(), 0, 4);
+
+  return (
+    1 +
+    Math.round(
+      ((tempDate - week1) / 86400000 -
+        3 +
+        ((week1.getDay() + 6) % 7)) /
+        7
+    )
+  );
+}
 
 function updateMonth() {
   document.getElementById("monthTitle").innerText =
@@ -80,10 +100,11 @@ function createDays() {
   const today = new Date();
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = getDaysInMonth(month, year);
-let totalEvents = 0;
-let examCount = 0;
-let meetingCount = 0;
-let birthdayCount = 0;
+
+  let totalEvents = 0;
+  let examCount = 0;
+  let meetingCount = 0;
+  let birthdayCount = 0;
 
   let emptyBoxes = firstDay - 1;
 
@@ -91,114 +112,141 @@ let birthdayCount = 0;
     emptyBoxes = 6;
   }
 
-for (let i = 0; i < emptyBoxes; i++) {
-  const emptyDay = document.createElement("div");
-  daysBox.appendChild(emptyDay);
-}
+  let dayNumber = 1;
+  let firstWeek = true;
 
-  for (let i = 1; i <= daysInMonth; i++) {
-  const day = document.createElement("div");
+  while (dayNumber <= daysInMonth) {
+    const mondayDate = new Date(
+      year,
+      month,
+      dayNumber - (firstWeek ? emptyBoxes : 0)
+    );
 
-    const key = year + "-" + month + "-" + i;
-    const holidayKey = month + "-" + i;
+    const weekBox = document.createElement("div");
+    weekBox.classList.add("week-number");
+    weekBox.innerText = getWeekNumber(mondayDate);
+    daysBox.appendChild(weekBox);
 
-    day.innerHTML = i;
+    for (let weekday = 0; weekday < 7; weekday++) {
+      if (firstWeek && weekday < emptyBoxes) {
+        const emptyDay = document.createElement("div");
+        daysBox.appendChild(emptyDay);
+      }
 
-    if (
-      i === today.getDate() &&
-      month === today.getMonth() &&
-      year === today.getFullYear()
-    ) {
-      day.classList.add("today-circle");
-    }
+      else if (dayNumber <= daysInMonth) {
+        const day = document.createElement("div");
 
-    if (holidays[holidayKey]) {
-      day.innerHTML = i + "<br>" + holidays[holidayKey];
-      day.style.background = "#fef3c7";
-      day.style.fontWeight = "bold";
-      day.style.color = "#92400e";
-    }
+        const key = year + "-" + month + "-" + dayNumber;
+        const holidayKey = month + "-" + dayNumber;
 
-    const dayEvents = getEventsForDay(key);
+        day.innerHTML = dayNumber;
 
-    if (dayEvents.length > 0) {
-      const allText = dayEvents.join(" ").toLowerCase();
+        if (
+          dayNumber === today.getDate() &&
+          month === today.getMonth() &&
+          year === today.getFullYear()
+        ) {
+          day.classList.add("today-circle");
+        }
 
-      if (!searchText || allText.includes(searchText)) {
-        let eventHtml = "";
+        if (holidays[holidayKey]) {
+          day.innerHTML = dayNumber + "<br>" + holidays[holidayKey];
+          day.style.background = "#fef3c7";
+          day.style.fontWeight = "bold";
+          day.style.color = "#92400e";
+        }
 
-        dayEvents.forEach(function (item) {
-          totalEvents++;
+        const dayEvents = getEventsForDay(key);
 
-          let icon = "• ";
+        if (dayEvents.length > 0) {
+          const allText = dayEvents.join(" ").toLowerCase();
 
-         if (
-           item.toLowerCase().includes("exam") ||
-           item.toLowerCase().includes("koe")
- ) {
-  icon = "📚 ";
-  examCount++;
-}
+          if (!searchText || allText.includes(searchText)) {
+            let eventHtml = "";
 
-else if (item.toLowerCase().includes("birthday")) {
-  icon = "🎂 ";
-  birthdayCount++;
-}
+            dayEvents.forEach(function (item) {
+              totalEvents++;
 
-else if (item.toLowerCase().includes("meeting")) {
-  icon = "💼 ";
-  meetingCount++;
-}
+              let icon = "• ";
 
-          eventHtml += "<small>" + icon + item + "</small><br>";
-        });
+              if (
+                item.toLowerCase().includes("exam") ||
+                item.toLowerCase().includes("koe")
+              ) {
+                icon = "📚 ";
+                examCount++;
+              }
 
-        day.innerHTML =
-          i +
-          "<br>" +
-          eventHtml +
-          '<span class="deleteBtn">❌</span>';
+              else if (item.toLowerCase().includes("birthday")) {
+                icon = "🎂 ";
+                birthdayCount++;
+              }
 
-        const deleteBtn = day.querySelector(".deleteBtn");
+              else if (item.toLowerCase().includes("meeting")) {
+                icon = "💼 ";
+                meetingCount++;
+              }
 
-        deleteBtn.onclick = function (event) {
-          event.stopPropagation();
+              eventHtml += "<small>" + icon + item + "</small><br>";
+            });
 
-          delete events[key];
-          saveEvents();
-          createDays();
+            day.innerHTML =
+              dayNumber +
+              "<br>" +
+              eventHtml +
+              '<span class="deleteBtn">❌</span>';
+
+            const deleteBtn = day.querySelector(".deleteBtn");
+
+            deleteBtn.onclick = function (event) {
+              event.stopPropagation();
+
+              delete events[key];
+              saveEvents();
+              createDays();
+            };
+
+            if (allText.includes("exam") || allText.includes("koe")) {
+              day.style.background = "#fef2f2";
+              day.style.color = "#111827";
+            }
+
+            if (allText.includes("birthday")) {
+              day.style.background = "#fce7f3";
+            }
+
+            if (allText.includes("meeting")) {
+              day.style.background = "#dbeafe";
+              day.style.color = "#111827";
+            }
+          }
+        }
+
+        day.onclick = function () {
+          selectedKey = key;
+
+          document.querySelectorAll(".days div").forEach(function (box) {
+            box.classList.remove("selected-day");
+          });
+
+          day.classList.add("selected-day");
         };
 
-        if (allText.includes("exam") || allText.includes("koe")) {
-          day.style.background = "#fef2f2";
-          day.style.color = "#111827";
-        }
+        daysBox.appendChild(day);
+        dayNumber++;
+      }
 
-        if (allText.includes("birthday")) {
-          day.style.background = "#fce7f3";
-        }
-        if (allText.includes("meeting")) {
-          day.style.background = "#dbeafe";
-          day.style.color = "#111827";
-        }
+      else {
+        const emptyDay = document.createElement("div");
+        daysBox.appendChild(emptyDay);
       }
     }
- day.onclick = function () {
-  selectedKey = key;  
 
-  document.querySelectorAll(".days div").forEach(function (box) {
-    box.classList.remove("selected-day");
-  });
-
-  day.classList.add("selected-day");
-};
-    daysBox.appendChild(day);
-    
-        }
-      
+    firstWeek = false;
+  }
 
   document.getElementById("eventCount").innerText =
-  "Tapahtumia yhteensä: " + totalEvents;
+    "Tapahtumia yhteensä: " + totalEvents;
 
   document.getElementById("examCount").innerText =
     "Kokeet: " + examCount;
@@ -386,7 +434,12 @@ if (localStorage.getItem("darkMode") === "on") {
 const today = new Date();
 
 document.getElementById("todayText").innerText =
-  today.toDateString();
+  today.toLocaleDateString("fi-FI", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
 
 document.getElementById("blueTheme").onclick = function () {
   document.body.className = "blue-theme";

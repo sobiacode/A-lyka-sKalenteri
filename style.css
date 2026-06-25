@@ -92,10 +92,11 @@ button:hover {
 
 .main-layout {
   display: grid;
-  grid-template-columns: 260px 1fr 300px;
+  grid-template-columns: 260px 760px 300px;
   gap: 20px;
   align-items: start;
 }
+
 
 .left-panel,
 .right-panel {
@@ -106,13 +107,17 @@ button:hover {
 
 .calendar-main {
   width: 100%;
+  max-width: 760px;
+  margin-left: 0;
+  margin-right: auto;
+
 }
 
 .weekdays,
 .days {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
+ grid-template-columns: 45px repeat(7, 85px);
+   gap: 8px;
 }
 
 .weekdays div {
@@ -154,7 +159,8 @@ button:hover {
 .quote-box,
 .event-list-box,
 .stats-box,
-.reminder-box {
+.reminder-box 
+.schedule-box {
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
@@ -368,4 +374,24 @@ margin-bottom:12px;
 .selected-day {
   outline: 3px solid #2563eb;
   background: #dbeafe !important;
+}
+.week-number {
+  background: #e0f2fe !important;
+  color: #1a73e8;
+  text-align: center !important;
+  font-weight: bold;
+}
+.event-form {
+  margin-top: 15px;
+  width: 100%;
+  clear: both;
+  grid-column: 1 / -1;
+}
+.schedule-box ul {
+  padding-left: 18px;
+}
+
+.schedule-box li {
+  margin-bottom: 8px;
+  font-weight: bold;
 }
