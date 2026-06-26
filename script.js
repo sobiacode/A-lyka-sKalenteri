@@ -1,4 +1,25 @@
 let events = JSON.parse(localStorage.getItem("calendarEvents")) || {};
+function addFixedSchedule() {
+  events["2026-7-20"] = ["📚 Projektin esitys"];
+
+  for (let d = 15; d <= 31; d++) {
+    events["2026-7-" + d] = ["💼 Työharjoittelu"];
+  }
+
+  for (let d = 1; d <= 15; d++) {
+    events["2026-8-" + d] = ["💼 Työharjoittelu"];
+  }
+
+  for (let d = 22; d <= 31; d++) {
+    events["2026-11-" + d] = ["❄ Talviloma"];
+  }
+
+  for (let d = 1; d <= 6; d++) {
+    events["2027-0-" + d] = ["❄ Talviloma"];
+  }
+
+  saveEvents();
+}
 const currentDate = new Date();
 
 let month = localStorage.getItem("savedMonth") !== null
@@ -191,20 +212,31 @@ function createDays() {
             });
 
             day.innerHTML =
-              dayNumber +
-              "<br>" +
-              eventHtml +
-              '<span class="deleteBtn">❌</span>';
+  dayNumber +
+  "<br>" +
+  eventHtml;
 
-            const deleteBtn = day.querySelector(".deleteBtn");
+if (
+  !eventHtml.includes("Työharjoittelu") &&
+  !eventHtml.includes("Projektin esitys") &&
+  !eventHtml.includes("Talviloma")
+) {
+  day.innerHTML =
+    dayNumber +
+    "<br>" +
+    eventHtml +
+    '<span class="deleteBtn">❌</span>';
 
-            deleteBtn.onclick = function (event) {
-              event.stopPropagation();
+  const deleteBtn = day.querySelector(".deleteBtn");
 
-              delete events[key];
-              saveEvents();
-              createDays();
-            };
+  deleteBtn.onclick = function (event) {
+    event.stopPropagation();
+
+    delete events[key];
+    saveEvents();
+    createDays();
+  };
+}
 
             if (allText.includes("exam") || allText.includes("koe")) {
               day.style.background = "#fef2f2";
@@ -320,7 +352,7 @@ document.getElementById("prevBtn").onclick = function () {
 
   localStorage.setItem("savedMonth", month);
   localStorage.setItem("savedYear", year);
-
+  addFixedSchedule();
   updateMonth();
 };
 
