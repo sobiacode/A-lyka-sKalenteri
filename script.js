@@ -36,16 +36,96 @@ const months = [
   "Syyskuu", "Lokakuu", "Marraskuu", "Joulukuu"
 ];
 
-const holidays = {
-  "0-1": "🎉 Uusivuosi",
-  "0-6": "✨ Loppiainen",
-  "4-1": "🎈 Vappu",
-  "11-6": "🇫🇮 Itsenäisyyspäivä",
-  "11-24": "🎄 Jouluaatto",
-  "11-25": "🎄 Joulupäivä",
-  "11-26": "🎁 Tapaninpäivä"
-};
+function addHoliday(list, date, text) {
+  const key = date.getMonth() + "-" + date.getDate();
+  list[key] = text;
+}
 
+function addDays(date, days) {
+  const newDate = new Date(date);
+  newDate.setDate(newDate.getDate() + days);
+  return newDate;
+}
+
+function getEasterDate(year) {
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+
+  return new Date(year, month, day);
+}
+
+function getSecondSunday(year, month) {
+  let date = new Date(year, month, 1);
+  let sundayCount = 0;
+
+  while (true) {
+    if (date.getDay() === 0) {
+      sundayCount++;
+      if (sundayCount === 2) return date;
+    }
+    date.setDate(date.getDate() + 1);
+  }
+}
+
+function getSaturdayBetween(year, month, startDay, endDay) {
+  for (let day = startDay; day <= endDay; day++) {
+    const date = new Date(year, month, day);
+    if (date.getDay() === 6) return date;
+  }
+}
+
+function getHolidaysForYear(year) {
+  const list = {};
+
+  const easter = getEasterDate(year);
+
+  addHoliday(list, new Date(year, 0, 1), "🎉 Uudenvuodenpäivä");
+  addHoliday(list, new Date(year, 0, 6), "✨ Loppiainen");
+
+  addHoliday(list, addDays(easter, -2), "✝️ Pitkäperjantai");
+  addHoliday(list, easter, "🌸 Pääsiäispäivä");
+  addHoliday(list, addDays(easter, 1), "🌸 Toinen pääsiäispäivä");
+
+  addHoliday(list, new Date(year, 4, 1), "🎈 Vappu");
+
+  addHoliday(list, getSecondSunday(year, 4), "💐 Äitienpäivä");
+
+  addHoliday(list, addDays(easter, 39), "☁️ Helatorstai");
+  addHoliday(list, addDays(easter, 49), "🔥 Helluntai");
+
+  const juhannusDay = getSaturdayBetween(year, 5, 20, 26);
+  addHoliday(list, addDays(juhannusDay, -1), "☀️ Juhannusaatto");
+  addHoliday(list, juhannusDay, "☀️ Juhannuspäivä");
+
+let pyhainpaiva = getSaturdayBetween(year, 9, 31, 31);
+
+if (!pyhainpaiva) {
+  pyhainpaiva = getSaturdayBetween(year, 10, 1, 6);
+}
+
+addHoliday(list, pyhainpaiva, "🕯️ Pyhäinpäivä");
+
+  addHoliday(list, getSecondSunday(year, 10), "💙 Isänpäivä");
+
+  addHoliday(list, new Date(year, 11, 6), "🇫🇮 Itsenäisyyspäivä");
+  addHoliday(list, new Date(year, 11, 24), "🎄 Jouluaatto");
+  addHoliday(list, new Date(year, 11, 25), "🎄 Joulupäivä");
+  addHoliday(list, new Date(year, 11, 26), "🎁 Tapaninpäivä");
+
+  return list;
+}
 const daysBox = document.getElementById("daysBox");
 let selectedKey = null;
 
@@ -121,6 +201,7 @@ function createDays() {
   const today = new Date();
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = getDaysInMonth(month, year);
+  const holidays = getHolidaysForYear(year);
 
   let totalEvents = 0;
   let examCount = 0;
