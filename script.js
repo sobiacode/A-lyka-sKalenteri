@@ -128,6 +128,22 @@ addHoliday(list, pyhainpaiva, "🕯️ Pyhäinpäivä");
 }
 const daysBox = document.getElementById("daysBox");
 let selectedKey = null;
+function createEventObject(title, category = "General", notes = "", image = "") {
+  return {
+    title: title,
+    category: category,
+    notes: notes,
+    image: image
+  };
+}
+
+function getEventTitle(eventItem) {
+  if (typeof eventItem === "string") {
+    return eventItem;
+  }
+
+  return eventItem.title;
+}
 
 function getEventsForDay(key) {
   if (!events[key]) return [];
@@ -141,6 +157,11 @@ function getEventsForDay(key) {
 
 function saveEvents() {
   localStorage.setItem("calendarEvents", JSON.stringify(events));
+}
+function createEvent(title) {
+  return {
+    title: title
+  };
 }
 
 function getDaysInMonth(month, year) {
@@ -250,46 +271,49 @@ function createDays() {
         ) {
           day.classList.add("today-circle");
         }
+      if (holidays[holidayKey]) {
+        day.innerHTML =
+        dayNumber +
+       '<br><small class="holidayText">' +
+        holidays[holidayKey] +
+       "</small>";
 
-        if (holidays[holidayKey]) {
-          day.innerHTML = dayNumber + "<br>" + holidays[holidayKey];
-          day.style.background = "#fef3c7";
-          day.style.fontWeight = "bold";
-          day.style.color = "#92400e";
-        }
+  day.classList.add("holiday-day");
+}
 
         const dayEvents = getEventsForDay(key);
 
         if (dayEvents.length > 0) {
-          const allText = dayEvents.join(" ").toLowerCase();
+          const allText = dayEvents.map(getEventTitle).join(" ").toLowerCase();
 
           if (!searchText || allText.includes(searchText)) {
             let eventHtml = "";
 
             dayEvents.forEach(function (item) {
+              const title = getEventTitle(item);
               totalEvents++;
 
               let icon = "• ";
 
               if (
-                item.toLowerCase().includes("exam") ||
-                item.toLowerCase().includes("koe")
+                title.toLowerCase().includes("exam") ||
+                title.toLowerCase().includes("koe")
               ) {
                 icon = "📚 ";
                 examCount++;
               }
 
-              else if (item.toLowerCase().includes("birthday")) {
+              else if (title.toLowerCase().includes("birthday")) {
                 icon = "🎂 ";
                 birthdayCount++;
               }
 
-              else if (item.toLowerCase().includes("meeting")) {
+              else if (title.toLowerCase().includes("meeting")) {
                 icon = "💼 ";
                 meetingCount++;
               }
 
-              eventHtml += "<small>" + icon + item + "</small><br>";
+              eventHtml += "<small>" + icon + title+ "</small><br>";
             });
 
             day.innerHTML =
@@ -489,7 +513,7 @@ document.getElementById("saveEventBtn").onclick = function () {
     events[selectedKey] = [];
   }
 
-  events[selectedKey].push(finalEvent);
+  events[selectedKey].push(createEvent(finalEvent));
 
   saveEvents();
   createDays();

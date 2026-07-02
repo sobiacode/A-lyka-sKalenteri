@@ -92,7 +92,7 @@ button:hover {
 
 .main-layout {
   display: grid;
-  grid-template-columns: 260px 1fr 240px
+  grid-template-columns: 260px 1fr 240px;
   gap: 20px;
   align-items: start;
 }
@@ -409,79 +409,4 @@ margin-bottom:12px;
   line-height: 1.2;
   word-break: break-word;
   white-space: normal;
-}
-/* ===== FINAL LAYOUT FIX ===== */
-
-.main-layout {
-  display: grid !important;
-  grid-template-columns: 240px 780px 260px !important;
-  gap: 18px !important;
-  align-items: start !important;
-  max-width: 1320px !important;
-  margin: 30px auto !important;
-}
-
-.left-panel,
-.right-panel {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 16px !important;
-  width: 100% !important;
-}
-
-.calendar-main {
-  width: 780px !important;
-  max-width: 780px !important;
-}
-
-.weekdays,
-.days {
-  display: grid !important;
-  grid-template-columns: 45px repeat(7, 90px) !important;
-  gap: 8px !important;
-}
-
-.days div {
-  min-height: 88px !important;
-  overflow: hidden !important;
-}
-
-.event-form {
-  display: flex !important;
-  gap: 8px !important;
-  margin-top: 14px !important;
-  max-width: 780px !important;
-}
-
-.event-form input {
-  width: 280px !important;
-}
-
-.event-form select {
-  width: 150px !important;
-}
-
-#saveEventBtn {
-  width: 150px !important;
-}
-
-.event-list-box,
-.map-box,
-.stats-box,
-.schedule-box,
-.reminder-box,
-.calculator-box {
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-@media (max-width: 1200px) {
-  .main-layout {
-    grid-template-columns: 1fr !important;
-  }
-
-  .calendar-main {
-    width: 100% !important;
-    overflow-x: auto !important;
-  }
 }
