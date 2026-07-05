@@ -158,9 +158,14 @@ function getEventsForDay(key) {
 function saveEvents() {
   localStorage.setItem("calendarEvents", JSON.stringify(events));
 }
-function createEvent(title) {
+function createEvent(title, category = "General", image = "") {
   return {
-    title: title
+    title: title,
+    category: category,
+    notes: "",
+    image: image,
+    location: "",
+    time: ""
   };
 }
 
@@ -289,7 +294,7 @@ function createDays() {
           if (!searchText || allText.includes(searchText)) {
             let eventHtml = "";
 
-            dayEvents.forEach(function (item) {
+            dayEvents.forEach(function (item, index) {
               const title = getEventTitle(item);
               totalEvents++;
 
@@ -313,7 +318,10 @@ function createDays() {
                 meetingCount++;
               }
 
-              eventHtml += "<small>" + icon + title+ "</small><br>";
+             eventHtml +=
+    '<small class="calendar-event" data-date="' + key + '" data-index="' + index + '">' +
+    icon + title +
+    '</small><br>';
             });
 
             day.innerHTML =
@@ -502,6 +510,9 @@ document.getElementById("saveEventBtn").onclick = function () {
   const eventName = eventInput.value.trim();
   const category = categorySelect.value;
 
+  const imageInput = document.getElementById("eventImage");
+const imageFile = imageInput.files[0];
+
   if (eventName === "") {
     alert("Kirjoita tapahtuman nimi.");
     return;
@@ -512,14 +523,35 @@ document.getElementById("saveEventBtn").onclick = function () {
   if (!events[selectedKey]) {
     events[selectedKey] = [];
   }
+  
+if (imageFile) {
+  const reader = new FileReader();
 
-  events[selectedKey].push(createEvent(finalEvent));
+  reader.onload = function () {
+    events[selectedKey].push(
+      createEvent(finalEvent, category, reader.result)
+    );
+
+    saveEvents();
+    createDays();
+    updateReminders();
+
+    eventInput.value = "";
+    imageInput.value = "";
+  };
+
+  reader.readAsDataURL(imageFile);
+} else {
+  events[selectedKey].push(
+    createEvent(finalEvent, category)
+  );
 
   saveEvents();
   createDays();
   updateReminders();
 
   eventInput.value = "";
+}
 };
 
 function updateClock() {
@@ -724,3 +756,16 @@ document.getElementById("addBtn").onclick = function () {
     "Tulos: " + result;
 };
 updateMonth();
+document.addEventListener("click", function (event) {
+
+    if (!event.target.classList.contains("calendar-event")) {
+        return;
+    }
+
+    const clickedDate = event.target.dataset.date;
+const clickedIndex = event.target.dataset.index;
+
+console.log("Date:", clickedDate);
+console.log("Index:", clickedIndex);
+
+});

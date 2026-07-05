@@ -351,6 +351,7 @@ margin-bottom:12px;
   gap: 8px;
   align-items: center;
   margin-top: 10px;
+  flex-wrap: wrap;
 }
 .event-form input {
  width: 250px;
@@ -409,4 +410,16 @@ margin-bottom:12px;
   line-height: 1.2;
   word-break: break-word;
   white-space: normal;
+}
+.calendar-event {
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.calendar-event:hover {
+  color: #1976d2;
+  text-decoration: underline;
+}
+#eventImage {
+  display: none;
 }
