@@ -770,6 +770,7 @@ const eventDate = document.getElementById("eventDate");
 
 const modalEventImage = document.getElementById("modalEventImage");
 const eventImagePreview = document.getElementById("eventImagePreview");
+const removePhotoBtn = document.getElementById("removePhotoBtn");
 
 let selectedEventDate = "";
 let selectedEventIndex = "";
@@ -851,4 +852,12 @@ modalEventImage.addEventListener("change", function () {
     eventImagePreview.classList.remove("hidden");
 };
     reader.readAsDataURL(file);
+});
+
+removePhotoBtn.addEventListener("click", function () {
+
+    selectedImageData = "";
+    eventImagePreview.src = "";
+    eventImagePreview.classList.add("hidden");
+
 });
