@@ -108,7 +108,7 @@
   type="file"
   id="eventImage"
   accept="image/*">
-  
+
   <button id="saveEventBtn">➕</button>
 
 </div>
@@ -190,7 +190,46 @@
   <footer>
     <p>💙 © 2026 Sobia – ÄlykäsKalenteri | Smart Calendar Project</p>
   </footer>
+<div id="eventModal" class="event-modal hidden">
+  <div class="event-modal-box">
+    <button id="closeEventModal" class="modal-close">×</button>
+    <h2>📅 Tapahtuman tiedot</h2>
+<p><strong>📅 Date:</strong></p>
+<p id="eventDate"></p>
 
+<p><strong>📝 Title:</strong></p>
+<p id="eventDetailsText"></p>
+
+<p><strong>🏷 Category:</strong></p>
+<p id="eventCategory"></p>
+
+<p><strong>🕒 Time:</strong></p>
+<input type="time" id="eventTimeInput">
+
+<p><strong>📍 Location:</strong></p>
+<input
+    type="text"
+    id="eventLocationInput"
+    placeholder="Enter location">
+
+
+<p id="eventNotes"></p>
+
+<p><strong>📝 Notes:</strong></p>
+
+<textarea id="eventNotesInput" placeholder="Write notes here..."></textarea>
+
+<p><strong>📷 Photo:</strong></p>
+
+<label for="modalEventImage" class="photo-label">📷 Add Photo</label>
+<input type="file" id="modalEventImage" accept="image/*" hidden>
+
+<img id="eventImagePreview" class="event-image-preview hidden" alt="Event photo">
+
+<button id="saveEventDetails">Save Details</button>
+
+  </div>
+</div>
   <script src="script.js"></script>
 
 </body>

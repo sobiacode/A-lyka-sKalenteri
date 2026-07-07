@@ -318,10 +318,16 @@ function createDays() {
                 meetingCount++;
               }
 
-             eventHtml +=
-    '<small class="calendar-event" data-date="' + key + '" data-index="' + index + '">' +
-    icon + title +
-    '</small><br>';
+             let photoIcon = "";
+
+         if (item.image) {
+        photoIcon = " 📷";
+}
+
+        eventHtml +=
+        '<small class="calendar-event" data-date="' + key + '" data-index="' + index + '">' +
+        icon + title + photoIcon +
+    '</small><br>'; 
             });
 
             day.innerHTML =
@@ -756,16 +762,93 @@ document.getElementById("addBtn").onclick = function () {
     "Tulos: " + result;
 };
 updateMonth();
+const eventModal = document.getElementById("eventModal");
+const closeEventModal = document.getElementById("closeEventModal");
+
+const eventDetailsText = document.getElementById("eventDetailsText");
+const eventDate = document.getElementById("eventDate");
+
+const modalEventImage = document.getElementById("modalEventImage");
+const eventImagePreview = document.getElementById("eventImagePreview");
+
+let selectedEventDate = "";
+let selectedEventIndex = "";
+let selectedImageData = "";
+
+closeEventModal.addEventListener("click", function () {
+    eventModal.classList.add("hidden");
+});
+
 document.addEventListener("click", function (event) {
 
     if (!event.target.classList.contains("calendar-event")) {
         return;
     }
 
-    const clickedDate = event.target.dataset.date;
+const clickedDate = event.target.dataset.date;
 const clickedIndex = event.target.dataset.index;
+selectedEventDate = clickedDate;
+selectedEventIndex = clickedIndex;
 
-console.log("Date:", clickedDate);
-console.log("Index:", clickedIndex);
+const clickedEvent = events[clickedDate][clickedIndex];
+selectedImageData = clickedEvent.image || "";
+modalEventImage.value = "";
 
+const clickedTitle = getEventTitle(clickedEvent);
+
+eventDetailsText.textContent = clickedTitle;
+eventDate.textContent = clickedDate;
+
+if (clickedEvent.image) {
+    eventImagePreview.src = clickedEvent.image;
+    eventImagePreview.classList.remove("hidden");
+} else {
+    eventImagePreview.classList.add("hidden");
+}
+
+document.getElementById("eventCategory").textContent =
+    clickedEvent.category || "General";
+
+document.getElementById("eventTimeInput").value =
+    clickedEvent.time || "";
+
+document.getElementById("eventLocationInput").value =
+    clickedEvent.location || "";
+
+document.getElementById("eventNotesInput").value =
+    clickedEvent.notes || "";
+
+
+eventModal.classList.remove("hidden");
+
+});
+document.getElementById("saveEventDetails").addEventListener("click", function () {
+
+    const selectedEvent = events[selectedEventDate][selectedEventIndex];
+
+selectedEvent.notes = document.getElementById("eventNotesInput").value;
+selectedEvent.time = document.getElementById("eventTimeInput").value;
+selectedEvent.location = document.getElementById("eventLocationInput").value;
+selectedEvent.image = selectedImageData;
+
+   saveEvents();
+
+    alert("Event details saved!");
+
+});
+modalEventImage.addEventListener("change", function () {
+    const file = modalEventImage.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function () {
+    selectedImageData = reader.result;
+    eventImagePreview.src = selectedImageData;
+    eventImagePreview.classList.remove("hidden");
+};
+    reader.readAsDataURL(file);
 });
