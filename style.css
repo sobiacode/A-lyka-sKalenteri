@@ -491,3 +491,48 @@ margin-bottom:12px;
     object-fit: cover;
     border-radius: 8px;
 }
+.remove-photo-btn {
+  margin-top: 8px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+#saveEventDetails {
+  width: 100%;
+  margin-top: 15px;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #1976d2;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#saveEventDetails:hover {
+  background: #1259a7;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.modal-header h2 {
+  margin: 0;
+}
+
+.modal-close {
+  position: static;
+  font-size: 28px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: #555;
+}

@@ -192,8 +192,10 @@
   </footer>
 <div id="eventModal" class="event-modal hidden">
   <div class="event-modal-box">
-    <button id="closeEventModal" class="modal-close">×</button>
-    <h2>📅 Tapahtuman tiedot</h2>
+    <div class="modal-header">
+  <h2>📅 Tapahtuman tiedot</h2>
+  <button id="closeEventModal" class="modal-close">×</button>
+</div>
 <p><strong>📅 Date:</strong></p>
 <p id="eventDate"></p>
 
@@ -225,8 +227,9 @@
 <input type="file" id="modalEventImage" accept="image/*" hidden>
 
 <img id="eventImagePreview" class="event-image-preview hidden" alt="Event photo">
+<button id="removePhotoBtn" class="remove-photo-btn">Remove Photo</button>
 
-<button id="saveEventDetails">Save Details</button>
+<button id="saveEventDetails">💾 Save Changes</button>
 
   </div>
 </div>

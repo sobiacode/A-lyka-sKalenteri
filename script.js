@@ -164,6 +164,7 @@ function createEvent(title, category = "General", image = "") {
     category: category,
     notes: "",
     image: image,
+    images: [],
     location: "",
     time: ""
   };
@@ -792,6 +793,9 @@ selectedEventDate = clickedDate;
 selectedEventIndex = clickedIndex;
 
 const clickedEvent = events[clickedDate][clickedIndex];
+if (!clickedEvent.images) {
+    clickedEvent.images = [];
+}
 selectedImageData = clickedEvent.image || "";
 modalEventImage.value = "";
 
@@ -831,7 +835,9 @@ selectedEvent.notes = document.getElementById("eventNotesInput").value;
 selectedEvent.time = document.getElementById("eventTimeInput").value;
 selectedEvent.location = document.getElementById("eventLocationInput").value;
 selectedEvent.image = selectedImageData;
-
+if (!selectedEvent.images) {
+    selectedEvent.images = [];
+}
    saveEvents();
 
     alert("Event details saved!");
@@ -848,6 +854,15 @@ modalEventImage.addEventListener("change", function () {
 
     reader.onload = function () {
     selectedImageData = reader.result;
+
+    const selectedEvent = events[selectedEventDate][selectedEventIndex];
+
+    if (!selectedEvent.images) {
+        selectedEvent.images = [];
+    }
+
+    selectedEvent.images.push(selectedImageData);
+
     eventImagePreview.src = selectedImageData;
     eventImagePreview.classList.remove("hidden");
 };
