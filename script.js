@@ -320,15 +320,16 @@ function createDays() {
               }
 
              let photoIcon = "";
+             let eventColor = item.color || "#000000";
 
          if (item.image) {
         photoIcon = " 📷";
 }
 
-        eventHtml +=
-        '<small class="calendar-event" data-date="' + key + '" data-index="' + index + '">' +
+       eventHtml +=
+       '<small class="calendar-event" style="color:' + eventColor + ';" data-date="' + key + '" data-index="' + index + '">' +
         icon + title + photoIcon +
-    '</small><br>'; 
+       '</small><br>';
             });
 
             day.innerHTML =
@@ -822,6 +823,8 @@ document.getElementById("eventLocationInput").value =
 
 document.getElementById("eventNotesInput").value =
     clickedEvent.notes || "";
+    document.getElementById("eventColorInput").value =
+    clickedEvent.color || "#1976d2";
 
 
 eventModal.classList.remove("hidden");
@@ -834,6 +837,7 @@ document.getElementById("saveEventDetails").addEventListener("click", function (
 selectedEvent.notes = document.getElementById("eventNotesInput").value;
 selectedEvent.time = document.getElementById("eventTimeInput").value;
 selectedEvent.location = document.getElementById("eventLocationInput").value;
+selectedEvent.color = document.getElementById("eventColorInput").value;
 selectedEvent.image = selectedImageData;
 if (!selectedEvent.images) {
     selectedEvent.images = [];

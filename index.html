@@ -196,6 +196,7 @@
   <h2>📅 Tapahtuman tiedot</h2>
   <button id="closeEventModal" class="modal-close">×</button>
 </div>
+    
 <p><strong>📅 Date:</strong></p>
 <p id="eventDate"></p>
 
@@ -205,18 +206,31 @@
 <p><strong>🏷 Category:</strong></p>
 <p id="eventCategory"></p>
 
-<p><strong>🕒 Time:</strong></p>
-<input type="time" id="eventTimeInput">
+<div class="time-location-row">
 
-<p><strong>📍 Location:</strong></p>
-<input
-    type="text"
-    id="eventLocationInput"
-    placeholder="Enter location">
+  <div class="field-group">
+    <p><strong>🕒 Time:</strong></p>
+    <input type="time" id="eventTimeInput">
+  </div>
+
+  <div class="field-group">
+    <p><strong>📍 Location:</strong></p>
+    <input
+      type="text"
+      id="eventLocationInput"
+      placeholder="Enter location">
+  </div>
+
+</div>
 
 
 <p id="eventNotes"></p>
+<p><strong>🎨 Event Color:</strong></p>
 
+<input
+    type="color"
+    id="eventColorInput"
+    value="#1976d2">
 <p><strong>📝 Notes:</strong></p>
 
 <textarea id="eventNotesInput" placeholder="Write notes here..."></textarea>

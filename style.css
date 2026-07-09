@@ -432,7 +432,8 @@ margin-bottom:12px;
   background: rgba(0, 0, 0, 0.45);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 30px;
   z-index: 2000;
 }
 
@@ -535,4 +536,36 @@ margin-bottom:12px;
   border: none;
   background: transparent;
   color: #555;
+}
+.modal-row {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-field {
+  flex: 1;
+}
+
+.modal-field input {
+  width: 100%;
+}
+.time-location-row {
+  display: flex;
+  gap: 12px;
+}
+
+.field-group:first-child {
+  flex: 0.8;
+}
+
+.field-group:last-child {
+  flex: 1.4;
+}
+.field-group input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#eventLocationInput {
+    max-width: 180px;
 }
