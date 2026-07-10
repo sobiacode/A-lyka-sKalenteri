@@ -772,6 +772,8 @@ const eventDate = document.getElementById("eventDate");
 
 const modalEventImage = document.getElementById("modalEventImage");
 const eventImagePreview = document.getElementById("eventImagePreview");
+const eventGallery = document.getElementById("eventGallery");
+
 const removePhotoBtn = document.getElementById("removePhotoBtn");
 
 let selectedEventDate = "";
@@ -781,7 +783,29 @@ let selectedImageData = "";
 closeEventModal.addEventListener("click", function () {
     eventModal.classList.add("hidden");
 });
+function showEventGallery(eventItem) {
+  eventGallery.innerHTML = "";
 
+  const photos = eventItem.images ? [...eventItem.images] : [];
+
+  if (eventItem.image && !photos.includes(eventItem.image)) {
+    photos.push(eventItem.image);
+  }
+
+  photos.forEach(function (photo) {
+    const thumbnail = document.createElement("img");
+
+    thumbnail.src = photo;
+    thumbnail.alt = "Event photo";
+
+    thumbnail.addEventListener("click", function () {
+      eventImagePreview.src = photo;
+      eventImagePreview.classList.remove("hidden");
+    });
+
+    eventGallery.appendChild(thumbnail);
+  });
+}
 document.addEventListener("click", function (event) {
 
     if (!event.target.classList.contains("calendar-event")) {
@@ -797,6 +821,8 @@ const clickedEvent = events[clickedDate][clickedIndex];
 if (!clickedEvent.images) {
     clickedEvent.images = [];
 }
+showEventGallery(clickedEvent);
+
 selectedImageData = clickedEvent.image || "";
 modalEventImage.value = "";
 
@@ -805,12 +831,8 @@ const clickedTitle = getEventTitle(clickedEvent);
 eventDetailsText.textContent = clickedTitle;
 eventDate.textContent = clickedDate;
 
-if (clickedEvent.image) {
-    eventImagePreview.src = clickedEvent.image;
-    eventImagePreview.classList.remove("hidden");
-} else {
-    eventImagePreview.classList.add("hidden");
-}
+eventImagePreview.src = "";
+eventImagePreview.classList.add("hidden");  
 
 document.getElementById("eventCategory").textContent =
     clickedEvent.category || "General";
@@ -823,8 +845,8 @@ document.getElementById("eventLocationInput").value =
 
 document.getElementById("eventNotesInput").value =
     clickedEvent.notes || "";
-    document.getElementById("eventColorInput").value =
-    clickedEvent.color || "#1976d2";
+   document.getElementById("eventThemeInput").value =
+    clickedEvent.theme || "nature";
 
 
 eventModal.classList.remove("hidden");
@@ -837,12 +859,32 @@ document.getElementById("saveEventDetails").addEventListener("click", function (
 selectedEvent.notes = document.getElementById("eventNotesInput").value;
 selectedEvent.time = document.getElementById("eventTimeInput").value;
 selectedEvent.location = document.getElementById("eventLocationInput").value;
-selectedEvent.color = document.getElementById("eventColorInput").value;
+selectedEvent.theme = document.getElementById("eventThemeInput").value;
 selectedEvent.image = selectedImageData;
+
 if (!selectedEvent.images) {
     selectedEvent.images = [];
 }
-   saveEvents();
+
+if (
+    selectedImageData &&
+    !selectedEvent.images.includes(selectedImageData)
+) {
+    selectedEvent.images.push(selectedImageData);
+}
+
+if (!selectedEvent.images) {
+    selectedEvent.images = [];
+}
+
+if (
+    selectedImageData &&
+    !selectedEvent.images.includes(selectedImageData)
+) {
+    selectedEvent.images.push(selectedImageData);
+}
+
+saveEvents();
 
     alert("Event details saved!");
 
@@ -854,22 +896,54 @@ modalEventImage.addEventListener("change", function () {
         return;
     }
 
-    const reader = new FileReader();
-
-    reader.onload = function () {
-    selectedImageData = reader.result;
-
-    const selectedEvent = events[selectedEventDate][selectedEventIndex];
-
-    if (!selectedEvent.images) {
-        selectedEvent.images = [];
+    if (!file.type.startsWith("image/")) {
+        alert("Please select an image file.");
+        modalEventImage.value = "";
+        return;
     }
 
-    selectedEvent.images.push(selectedImageData);
+    const reader = new FileReader();
 
-    eventImagePreview.src = selectedImageData;
-    eventImagePreview.classList.remove("hidden");
-};
+    reader.onload = function (event) {
+        const image = new Image();
+
+        image.onload = function () {
+            const maxWidth = 800;
+            const maxHeight = 800;
+
+            let width = image.width;
+            let height = image.height;
+
+            if (width > maxWidth || height > maxHeight) {
+                const scale = Math.min(
+                    maxWidth / width,
+                    maxHeight / height
+                );
+
+                width = Math.round(width * scale);
+                height = Math.round(height * scale);
+            }
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+
+            const context = canvas.getContext("2d");
+
+            context.drawImage(image, 0, 0, width, height);
+
+            selectedImageData = canvas.toDataURL(
+                "image/jpeg",
+                0.65
+            );
+
+            eventImagePreview.src = selectedImageData;
+            eventImagePreview.classList.remove("hidden");
+        };
+
+        image.src = event.target.result;
+    };
+
     reader.readAsDataURL(file);
 });
 

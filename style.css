@@ -569,3 +569,24 @@ margin-bottom:12px;
 #eventLocationInput {
     max-width: 180px;
 }
+.event-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.event-gallery img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid #ddd;
+  transition: 0.2s;
+}
+
+.event-gallery img:hover {
+  transform: scale(1.05);
+  border-color: #1976d2;
+}

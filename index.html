@@ -225,14 +225,19 @@
 
 
 <p id="eventNotes"></p>
-<p><strong>🎨 Event Color:</strong></p>
 
-<input
-    type="color"
-    id="eventColorInput"
-    value="#1976d2">
+<p><strong>🎨 Event Theme:</strong></p>
+
+<select id="eventThemeInput">
+    <option value="nature">🟢 Nature</option>
+    <option value="ocean">🔵 Ocean</option>
+    <option value="lavender">🟣 Lavender</option>
+    <option value="rose">🔴 Rose</option>
+    <option value="sunset">🟠 Sunset</option>
+    <option value="slate">⚫ Slate</option>
+</select>
+
 <p><strong>📝 Notes:</strong></p>
-
 <textarea id="eventNotesInput" placeholder="Write notes here..."></textarea>
 
 <p><strong>📷 Photo:</strong></p>
@@ -241,6 +246,7 @@
 <input type="file" id="modalEventImage" accept="image/*" hidden>
 
 <img id="eventImagePreview" class="event-image-preview hidden" alt="Event photo">
+<div id="eventGallery" class="event-gallery"></div>
 <button id="removePhotoBtn" class="remove-photo-btn">Remove Photo</button>
 
 <button id="saveEventDetails">💾 Save Changes</button>
