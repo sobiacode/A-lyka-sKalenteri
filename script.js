@@ -146,28 +146,118 @@ function getEventTitle(eventItem) {
 }
 
 function getEventsForDay(key) {
-  if (!events[key]) return [];
+  function parseDateKey(dateKey) {
+    const parts = dateKey.split("-").map(Number);
 
-  if (Array.isArray(events[key])) {
-    return events[key];
+    if (parts.length !== 3 || parts.some(Number.isNaN)) {
+      return null;
+    }
+
+    const parsedDate = new Date(parts[0], parts[1], parts[2]);
+
+    if (
+      parsedDate.getFullYear() !== parts[0] ||
+      parsedDate.getMonth() !== parts[1] ||
+      parsedDate.getDate() !== parts[2]
+    ) {
+      return null;
+    }
+
+    return {
+      year: parts[0],
+      month: parts[1],
+      day: parts[2],
+      time: Date.UTC(parts[0], parts[1], parts[2])
+    };
   }
 
-  return [events[key]];
+  const occurrenceDate = parseDateKey(key);
+
+  if (!occurrenceDate) {
+    return [];
+  }
+
+  const dayEvents = [];
+  const sourceDates = Object.keys(events);
+  const exactDatePosition = sourceDates.indexOf(key);
+
+  if (exactDatePosition > 0) {
+    sourceDates.splice(exactDatePosition, 1);
+    sourceDates.unshift(key);
+  }
+
+  sourceDates.forEach(function (sourceDate) {
+    const originalDate = parseDateKey(sourceDate);
+
+    if (!originalDate || occurrenceDate.time < originalDate.time) {
+      return;
+    }
+
+    const storedEvents = Array.isArray(events[sourceDate])
+      ? events[sourceDate]
+      : [events[sourceDate]];
+
+    storedEvents.forEach(function (eventItem, sourceIndex) {
+      const repeat =
+        eventItem && typeof eventItem === "object"
+          ? eventItem.repeat || "none"
+          : "none";
+
+      const isOriginalDate = sourceDate === key;
+      const elapsedDays =
+        (occurrenceDate.time - originalDate.time) / 86400000;
+
+      let occursOnDate = isOriginalDate;
+
+      if (!isOriginalDate) {
+        if (repeat === "daily") {
+          occursOnDate = true;
+        } else if (repeat === "weekly") {
+          occursOnDate = elapsedDays % 7 === 0;
+        } else if (repeat === "monthly") {
+          occursOnDate = occurrenceDate.day === originalDate.day;
+        } else if (repeat === "yearly") {
+          occursOnDate =
+            occurrenceDate.month === originalDate.month &&
+            occurrenceDate.day === originalDate.day;
+        }
+      }
+
+      if (!occursOnDate) {
+        return;
+      }
+
+      if (repeat === "none" || typeof eventItem !== "object" || !eventItem) {
+        dayEvents.push(eventItem);
+        return;
+      }
+
+      dayEvents.push({
+        ...eventItem,
+        sourceDate: sourceDate,
+        sourceIndex: sourceIndex,
+        occurrenceDate: key
+      });
+    });
+  });
+
+  return dayEvents;
 }
 
 function saveEvents() {
   localStorage.setItem("calendarEvents", JSON.stringify(events));
 }
 function createEvent(title, category = "General", image = "") {
-  return {
-    title: title,
-    category: category,
-    notes: "",
-    image: image,
-    images: [],
-    location: "",
-    time: ""
-  };
+    return {
+        title: title,
+        category: category,
+        notes: "",
+        image: image,
+        images: [],
+        location: "",
+        time: "",
+        repeat: "none"
+    };
 }
 
 function getDaysInMonth(month, year) {
@@ -295,8 +385,10 @@ function createDays() {
           if (!searchText || allText.includes(searchText)) {
             let eventHtml = "";
 
-            dayEvents.forEach(function (item, index) {
+           dayEvents.forEach(function (item, index) {
               const title = getEventTitle(item);
+              const sourceDate = item.sourceDate || key;
+              const sourceIndex = item.sourceIndex ?? index;
               totalEvents++;
 
               let icon = "• ";
@@ -327,7 +419,7 @@ function createDays() {
 }
 
        eventHtml +=
-       '<small class="calendar-event" style="color:' + eventColor + ';" data-date="' + key + '" data-index="' + index + '">' +
+       '<small class="calendar-event" style="color:' + eventColor + ';" data-date="' + key + '" data-index="' + index + '" data-source-date="' + sourceDate + '" data-source-index="' + sourceIndex + '">' +
         icon + title + photoIcon +
        '</small><br>';
             });
@@ -812,12 +904,27 @@ document.addEventListener("click", function (event) {
         return;
     }
 
-const clickedDate = event.target.dataset.date;
-const clickedIndex = event.target.dataset.index;
-selectedEventDate = clickedDate;
-selectedEventIndex = clickedIndex;
+const occurrenceDate = event.target.dataset.date;
+const sourceDate = event.target.dataset.sourceDate || occurrenceDate;
+const sourceIndexValue =
+    event.target.dataset.sourceIndex ?? event.target.dataset.index;
+const sourceIndex = Number(sourceIndexValue);
 
-const clickedEvent = events[clickedDate][clickedIndex];
+if (
+    !occurrenceDate ||
+    !sourceDate ||
+    !Number.isInteger(sourceIndex) ||
+    sourceIndex < 0 ||
+    !Array.isArray(events[sourceDate]) ||
+    typeof events[sourceDate][sourceIndex] === "undefined"
+) {
+    return;
+}
+
+selectedEventDate = sourceDate;
+selectedEventIndex = sourceIndex;
+
+const clickedEvent = events[sourceDate][sourceIndex];
 if (!clickedEvent.images) {
     clickedEvent.images = [];
 }
@@ -829,7 +936,7 @@ modalEventImage.value = "";
 const clickedTitle = getEventTitle(clickedEvent);
 
 eventDetailsText.textContent = clickedTitle;
-eventDate.textContent = clickedDate;
+eventDate.textContent = occurrenceDate;
 
 eventImagePreview.src = "";
 eventImagePreview.classList.add("hidden");  
@@ -845,8 +952,12 @@ document.getElementById("eventLocationInput").value =
 
 document.getElementById("eventNotesInput").value =
     clickedEvent.notes || "";
-   document.getElementById("eventThemeInput").value =
+
+document.getElementById("eventThemeInput").value =
     clickedEvent.theme || "nature";
+
+document.getElementById("eventRepeatInput").value =
+    clickedEvent.repeat || "none";
 
 
 eventModal.classList.remove("hidden");
@@ -860,6 +971,9 @@ selectedEvent.notes = document.getElementById("eventNotesInput").value;
 selectedEvent.time = document.getElementById("eventTimeInput").value;
 selectedEvent.location = document.getElementById("eventLocationInput").value;
 selectedEvent.theme = document.getElementById("eventThemeInput").value;
+selectedEvent.repeat =
+    document.getElementById("eventRepeatInput").value;
+
 selectedEvent.image = selectedImageData;
 
 if (!selectedEvent.images) {
@@ -885,6 +999,7 @@ if (
 }
 
 saveEvents();
+createDays();
 
     alert("Event details saved!");
 
