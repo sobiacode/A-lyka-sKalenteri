@@ -74,6 +74,40 @@
           </iframe>
         </div>
 
+        <section class="weather-box" id="weatherBox" aria-labelledby="weatherTitle">
+          <div class="weather-header">
+            <div>
+              <h3 id="weatherTitle">🌦 Sää</h3>
+              <p>Pori, Finland</p>
+            </div>
+            <button id="refreshWeatherBtn" type="button" aria-label="Päivitä sää">↻</button>
+          </div>
+
+          <p id="weatherStatus" class="weather-status" role="status" aria-live="polite">
+            Säätietoja ladataan…
+          </p>
+
+          <div id="weatherContent" class="weather-content hidden">
+            <div class="weather-current">
+              <span id="weatherIcon" class="weather-icon" aria-hidden="true">🌤️</span>
+              <div>
+                <strong id="weatherTemperature">--°</strong>
+                <span id="weatherDescription">--</span>
+              </div>
+            </div>
+
+            <div class="weather-details">
+              <span id="weatherFeelsLike">Tuntuu kuin --°</span>
+              <span id="weatherRange">Ylin --° · Alin --°</span>
+              <span id="weatherWind">Tuuli -- km/h</span>
+              <span id="weatherRain">Sade --%</span>
+            </div>
+
+            <div id="weatherAlert" class="weather-alert" role="status" aria-live="polite"></div>
+            <small id="weatherUpdated" class="weather-updated"></small>
+          </div>
+        </section>
+
       </div>
 
       <div class="calendar-main">
@@ -112,6 +146,7 @@
   <button id="saveEventBtn">➕</button>
 
 </div>
+<p id="eventFormError" class="event-form-error hidden" role="alert" aria-live="polite"></p>
 
       </div>
 
@@ -127,11 +162,7 @@
       <div class="schedule-box">
   <h3>📋 Aikataulu</h3>
 
-  <ul id="scheduleList">
-  <li>📚 Elokuu 2026 – Projektin esitys 20.8.2026</li>
-  <li>💼 15.8.2026–15.9.2026 Työharjoittelu</li>
-  <li>❄ Talviloma 22.12.2026–6.1.2027</li>
-</ul>
+  <ul id="scheduleList"></ul>
 </div>
 
         <div class="reminder-box">
@@ -196,69 +227,99 @@
   <h2>📅 Tapahtuman tiedot</h2>
   <button id="closeEventModal" class="modal-close">×</button>
 </div>
-    
-<p><strong>📅 Date:</strong></p>
-<p id="eventDate"></p>
 
-<p><strong>📝 Title:</strong></p>
-<p id="eventDetailsText"></p>
+<div class="event-modal-grid">
+  <label class="modal-field">
+    <span>📅 Start Date</span>
+    <input type="date" id="eventDate">
+  </label>
 
-<p><strong>🏷 Category:</strong></p>
-<p id="eventCategory"></p>
+  <label class="modal-field">
+    <span>🏁 End Date</span>
+    <input type="date" id="eventEndDate">
+  </label>
 
-<div class="time-location-row">
+  <label class="modal-field">
+    <span>📝 Title</span>
+    <input type="text" id="eventDetailsText" placeholder="Event title">
+  </label>
 
-  <div class="field-group">
-    <p><strong>🕒 Time:</strong></p>
+  <label class="modal-field">
+    <span>🏷 Category</span>
+    <select id="eventCategory">
+      <option value="General">General</option>
+      <option value="Exam">Koe</option>
+      <option value="Meeting">Tapaaminen</option>
+      <option value="Birthday">Syntymäpäivä</option>
+    </select>
+  </label>
+
+  <label class="modal-field">
+    <span>🕒 Start Time</span>
     <input type="time" id="eventTimeInput">
+  </label>
+
+  <label class="modal-field">
+    <span>🏁 End Time</span>
+    <input type="time" id="eventEndTimeInput">
+  </label>
+
+  <label class="modal-field modal-field-wide">
+    <span>📍 Location</span>
+    <input type="text" id="eventLocationInput" placeholder="Enter location">
+  </label>
+
+  <label class="modal-field">
+    <span>🎨 Event Theme</span>
+    <select id="eventThemeInput">
+      <option value="nature">🟢 Nature</option>
+      <option value="ocean">🔵 Ocean</option>
+      <option value="lavender">🟣 Lavender</option>
+      <option value="rose">🔴 Rose</option>
+      <option value="sunset">🟠 Sunset</option>
+      <option value="slate">⚫ Slate</option>
+    </select>
+  </label>
+
+  <label class="modal-field">
+    <span>🔁 Repeat</span>
+    <select id="eventRepeatInput">
+      <option value="none">Does not repeat</option>
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+      <option value="monthly">Monthly</option>
+      <option value="yearly">Yearly</option>
+    </select>
+  </label>
+
+  <label class="modal-field modal-field-wide">
+    <span>📝 Notes</span>
+    <textarea id="eventNotesInput" placeholder="Write notes here..."></textarea>
+  </label>
+
+  <div class="modal-field-wide modal-photo-section">
+    <div class="photo-actions">
+      <label for="modalEventImage" class="photo-label">📷 Add Photo</label>
+      <button id="removePhotoBtn" class="remove-photo-btn">🗑 Remove Photo</button>
+    </div>
+    <input type="file" id="modalEventImage" accept="image/*" hidden>
+    <img id="eventImagePreview" class="event-image-preview hidden" alt="Event photo">
+    <div id="eventGallery" class="event-gallery"></div>
   </div>
 
-  <div class="field-group">
-    <p><strong>📍 Location:</strong></p>
-    <input
-      type="text"
-      id="eventLocationInput"
-      placeholder="Enter location">
+  <div id="deleteConfirmPanel" class="modal-delete-confirm modal-field-wide hidden">
+    <span id="deleteConfirmText">Delete this event?</span>
+    <div class="modal-delete-confirm-actions">
+      <button id="cancelDeleteEvent" type="button">Cancel</button>
+      <button id="confirmDeleteEvent" type="button">Delete</button>
+    </div>
   </div>
 
+  <div class="modal-footer-actions modal-field-wide">
+    <button id="deleteEventBtn" type="button">🗑 Delete Event</button>
+    <button id="saveEventDetails" type="button">💾 Save Changes</button>
+  </div>
 </div>
-
-
-<p id="eventNotes"></p>
-
-<p><strong>🎨 Event Theme:</strong></p>
-
-<select id="eventThemeInput">
-    <option value="nature">🟢 Nature</option>
-    <option value="ocean">🔵 Ocean</option>
-    <option value="lavender">🟣 Lavender</option>
-    <option value="rose">🔴 Rose</option>
-    <option value="sunset">🟠 Sunset</option>
-    <option value="slate">⚫ Slate</option>
-</select>
-
-<p><strong>🔁 Repeat:</strong></p>
-<select id="eventRepeatInput">
-    <option value="none">Does not repeat</option>
-    <option value="daily">Daily</option>
-    <option value="weekly">Weekly</option>
-    <option value="monthly">Monthly</option>
-    <option value="yearly">Yearly</option>
-</select>
-
-<p><strong>📝 Notes:</strong></p>
-<textarea id="eventNotesInput" placeholder="Write notes here..."></textarea>
-
-<p><strong>📷 Photo:</strong></p>
-
-<label for="modalEventImage" class="photo-label">📷 Add Photo</label>
-<input type="file" id="modalEventImage" accept="image/*" hidden>
-
-<img id="eventImagePreview" class="event-image-preview hidden" alt="Event photo">
-<div id="eventGallery" class="event-gallery"></div>
-<button id="removePhotoBtn" class="remove-photo-btn">Remove Photo</button>
-
-<button id="saveEventDetails">💾 Save Changes</button>
 
   </div>
 </div>
