@@ -10,24 +10,63 @@
 
   <div class="calendar-box">
 
-    <h1>ÄlykäsKalenteri</h1>
-    <h2 id="todayText"></h2>
-    <h3 id="clock"></h3>
+    <header class="app-header">
+      <div class="app-brand">
+        <span class="app-logo" aria-hidden="true">📅</span>
+        <div>
+          <h1>ÄlykäsKalenteri</h1>
+          <p>Plan your days with clarity</p>
+        </div>
+      </div>
 
-    <button id="darkModeBtn">Tumma tila</button>
-    <button id="clearBtn">Tyhjennä tapahtumat</button>
-    <button id="todayBtn">Tänään</button>
+      <div class="header-date">
+        <h2 id="todayText"></h2>
+        <h3 id="clock"></h3>
+      </div>
 
-    <input type="text" id="searchInput" placeholder="Etsi tapahtumaa">
+      <div class="header-actions">
+        <button id="todayBtn" type="button">Tänään</button>
+        <button id="focusModeBtn" class="secondary-button" type="button" aria-pressed="false">Focus</button>
+        <button id="darkModeBtn" class="icon-button" type="button" aria-label="Toggle dark mode">◐</button>
+        <button id="createEventBtn" class="primary-action" type="button">＋ New event</button>
+      </div>
+    </header>
 
-    <button id="blueTheme">🔵 Blue</button>
-    <button id="greenTheme">🟢 Green</button>
-    <button id="purpleTheme">🟣 Purple</button>
+    <div class="command-bar">
+      <label class="search-control">
+        <span aria-hidden="true">⌕</span>
+        <input type="search" id="searchInput" placeholder="Search events, notes or locations">
+      </label>
 
-    <p>Älykäs kalenterisovellus, jossa voi lisätä, etsiä ja poistaa tapahtumia.</p>
+      <select id="categoryFilter" aria-label="Filter by category">
+        <option value="all">All categories</option>
+        <option value="General">General</option>
+        <option value="Exam">Koe</option>
+        <option value="Meeting">Tapaaminen</option>
+        <option value="Birthday">Syntymäpäivä</option>
+      </select>
 
-    <div class="info-box">
-      <p>Ominaisuudet: tapahtumat, haku, tumma tila ja juhlapyhät.</p>
+      <div class="view-switcher" role="group" aria-label="Calendar view">
+        <button type="button" class="view-button active" data-view="month" aria-pressed="true">Month</button>
+        <button type="button" class="view-button" data-view="week" aria-pressed="false">Week</button>
+        <button type="button" class="view-button" data-view="day" aria-pressed="false">Day</button>
+        <button type="button" class="view-button" data-view="agenda" aria-pressed="false">Agenda</button>
+      </div>
+
+      <div class="data-actions">
+        <button id="exportJsonBtn" class="secondary-button" type="button">Backup</button>
+        <button id="exportIcsBtn" class="secondary-button" type="button">Export .ics</button>
+        <label for="importJsonInput" class="import-label">Restore</label>
+        <input id="importJsonInput" type="file" accept="application/json,.json" hidden>
+        <button id="clearBtn" class="danger-quiet" type="button">Clear</button>
+      </div>
+    </div>
+
+    <div class="theme-strip" aria-label="Colour theme">
+      <span>Theme</span>
+      <button id="blueTheme" type="button" aria-label="Blue theme">🔵</button>
+      <button id="greenTheme" type="button" aria-label="Green theme">🟢</button>
+      <button id="purpleTheme" type="button" aria-label="Purple theme">🟣</button>
     </div>
 
     <div class="month-header">
@@ -112,6 +151,7 @@
 
       <div class="calendar-main">
 
+        <div class="calendar-grid-scroll" tabindex="0" aria-label="Kalenteriruudukko, vieritä vaakasuunnassa tarvittaessa">
         <div class="weekdays">
         <div>Vk</div>
         <div>Ma</div>
@@ -123,30 +163,9 @@
         <div>Su</div>
       </div>
         <div class="days" id="daysBox"></div>
-        <div id="eventForm" class="event-form">
-
-  <input
-    type="text"
-    id="eventInput"
-    placeholder="Tapahtuman nimi">
-
-  <select id="categorySelect">
-    <option value="General">General</option>
-    <option value="Exam">Koe</option>
-    <option value="Meeting">Tapaaminen</option>
-    <option value="Birthday">Syntymäpäivä</option>
-  </select>
-<label for="eventImage">📷 Add Photo</label>
-
-<input
-  type="file"
-  id="eventImage"
-  accept="image/*">
-
-  <button id="saveEventBtn">➕</button>
-
-</div>
-<p id="eventFormError" class="event-form-error hidden" role="alert" aria-live="polite"></p>
+        </div>
+        <p class="calendar-help">Tip: double-click a day to create an event.</p>
+        <section id="alternativeView" class="alternative-view hidden" aria-live="polite"></section>
 
       </div>
 
@@ -170,6 +189,7 @@
           <ul id="reminderList"></ul>
 
           <button id="checkReminderBtn">🔔 Tarkista muistutukset</button>
+          <button id="enableNotificationsBtn" class="secondary-button" type="button">Enable notifications</button>
 
           <p id="timerDisplay">00:00</p>
 
@@ -191,27 +211,65 @@
           </div>
         </div>
 
-<div class="calculator-box">
-  <h3>🧮 Laskuri</h3>
+<section class="calculator-box" aria-labelledby="calculatorTitle">
+  <div class="calculator-header">
+    <div>
+      <h3 id="calculatorTitle">🧮 Laskuri</h3>
+      <span>Numbers, dates &amp; time</span>
+    </div>
+    <button id="clearCalculatorBtn" type="button" aria-label="Tyhjennä laskuri">AC</button>
+  </div>
 
-  <input
-    type="number"
-    id="num1"
-    placeholder="Numero 1">
+  <div class="calculator-section">
+    <h4>Peruslaskin</h4>
+    <div class="calculator-number-row">
+      <input type="number" id="num1" step="any" placeholder="Numero 1" aria-label="Ensimmäinen numero">
+      <input type="number" id="num2" step="any" placeholder="Numero 2" aria-label="Toinen numero">
+    </div>
+    <div class="calculator-operations" aria-label="Laskutoimitukset">
+      <button type="button" data-operation="add" aria-label="Yhteenlasku">+</button>
+      <button type="button" data-operation="subtract" aria-label="Vähennyslasku">−</button>
+      <button type="button" data-operation="multiply" aria-label="Kertolasku">×</button>
+      <button type="button" data-operation="divide" aria-label="Jakolasku">÷</button>
+      <button type="button" data-operation="percent" aria-label="Prosentti">%</button>
+    </div>
+    <output id="calcResult" class="calculator-result" aria-live="polite">Tulos: 0</output>
+  </div>
 
-  <input
-    type="number"
-    id="num2"
-    placeholder="Numero 2">
+  <div class="calculator-section">
+    <h4>📅 Päivien määrä</h4>
+    <label>
+      <span>Alkupäivä</span>
+      <input type="date" id="dateCalcStart">
+    </label>
+    <label>
+      <span>Loppupäivä</span>
+      <input type="date" id="dateCalcEnd">
+    </label>
+    <button id="calculateDatesBtn" class="calculator-wide-button" type="button">Laske päivät</button>
+    <output id="dateCalcResult" class="calculator-result" aria-live="polite">Valitse päivät</output>
+  </div>
 
-  <button id="addBtn">
-    Laske +
-  </button>
-
-  <p id="calcResult">
-    Tulos: 0
-  </p>
-</div>
+  <div class="calculator-section">
+    <h4>🕒 Ajan kesto</h4>
+    <div class="calculator-time-row">
+      <label>
+        <span>Alkaa</span>
+        <input type="time" id="timeCalcStart">
+      </label>
+      <label>
+        <span>Päättyy</span>
+        <input type="time" id="timeCalcEnd">
+      </label>
+    </div>
+    <label>
+      <span>Tauko (min)</span>
+      <input type="number" id="timeCalcBreak" min="0" step="1" value="0">
+    </label>
+    <button id="calculateTimeBtn" class="calculator-wide-button" type="button">Laske kesto</button>
+    <output id="timeCalcResult" class="calculator-result" aria-live="polite">Valitse ajat</output>
+  </div>
+</section>
       </div>
 
     </div>
@@ -224,11 +282,13 @@
 <div id="eventModal" class="event-modal hidden">
   <div class="event-modal-box">
     <div class="modal-header">
-  <h2>📅 Tapahtuman tiedot</h2>
+  <h2 id="eventModalTitle">📅 Tapahtuman tiedot</h2>
   <button id="closeEventModal" class="modal-close">×</button>
 </div>
 
 <div class="event-modal-grid">
+  <p id="modalFormError" class="modal-form-error modal-field-wide hidden" role="alert" aria-live="polite"></p>
+
   <label class="modal-field">
     <span>📅 Start Date</span>
     <input type="date" id="eventDate">
@@ -264,6 +324,11 @@
     <input type="time" id="eventEndTimeInput">
   </label>
 
+  <label class="modal-check-field modal-field-wide">
+    <input type="checkbox" id="eventAllDayInput">
+    <span>All-day event</span>
+  </label>
+
   <label class="modal-field modal-field-wide">
     <span>📍 Location</span>
     <input type="text" id="eventLocationInput" placeholder="Enter location">
@@ -289,8 +354,39 @@
       <option value="weekly">Weekly</option>
       <option value="monthly">Monthly</option>
       <option value="yearly">Yearly</option>
+      <option value="custom">Custom interval</option>
     </select>
   </label>
+
+  <label class="modal-field">
+    <span>🔔 Reminder</span>
+    <select id="eventReminderInput">
+      <option value="none">No reminder</option>
+      <option value="10">10 minutes before</option>
+      <option value="60">1 hour before</option>
+      <option value="1440">1 day before</option>
+    </select>
+  </label>
+
+  <div id="customRepeatFields" class="custom-repeat-fields modal-field-wide hidden">
+    <label class="modal-field">
+      <span>Repeat every</span>
+      <input type="number" id="eventRepeatInterval" min="1" max="99" value="1">
+    </label>
+    <label class="modal-field">
+      <span>Interval</span>
+      <select id="eventRepeatUnit">
+        <option value="day">Day(s)</option>
+        <option value="week">Week(s)</option>
+        <option value="month">Month(s)</option>
+        <option value="year">Year(s)</option>
+      </select>
+    </label>
+    <label class="modal-field">
+      <span>Repeat until (optional)</span>
+      <input type="date" id="eventRepeatUntil">
+    </label>
+  </div>
 
   <label class="modal-field modal-field-wide">
     <span>📝 Notes</span>
@@ -323,6 +419,7 @@
 
   </div>
 </div>
+<div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
   <script src="script.js"></script>
 
 </body>
