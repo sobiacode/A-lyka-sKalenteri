@@ -54,6 +54,7 @@
       </div>
 
       <div class="data-actions">
+        <button id="createFromTextBtn" class="secondary-button" type="button">✨ From message</button>
         <button id="exportJsonBtn" class="secondary-button" type="button">Backup</button>
         <button id="exportIcsBtn" class="secondary-button" type="button">Export .ics</button>
         <label for="importJsonInput" class="import-label">Restore</label>
@@ -417,6 +418,49 @@
   </div>
 </div>
 
+  </div>
+</div>
+<div id="textImportModal" class="event-modal hidden">
+  <div class="event-modal-box text-import-box">
+    <div class="modal-header">
+      <div>
+        <h2>✨ Create event from text</h2>
+        <p>Paste an email or message. Analysis happens only in this browser.</p>
+      </div>
+      <button id="closeTextImportModal" class="modal-close" type="button" aria-label="Close text import">×</button>
+    </div>
+
+    <label class="text-import-field" for="smartEventText">
+      <span>Email or message</span>
+      <textarea id="smartEventText" placeholder="Subject: Project meeting&#10;Date: 20.8.2026&#10;Time: 14:30–16:00&#10;Location: Pori office"></textarea>
+    </label>
+
+    <p id="textImportError" class="modal-form-error hidden" role="alert" aria-live="polite"></p>
+
+    <div class="text-import-actions">
+      <button id="cancelTextImport" class="secondary-button" type="button">Cancel</button>
+      <button id="analyzeEventTextBtn" type="button">Find event details</button>
+    </div>
+
+    <section id="textSuggestionPreview" class="text-suggestion hidden" aria-live="polite">
+      <div class="suggestion-heading">
+        <div>
+          <span>Suggested event</span>
+          <strong id="suggestedEventTitle">Untitled event</strong>
+        </div>
+        <span id="suggestionConfidence" class="suggestion-confidence"></span>
+      </div>
+
+      <dl class="suggestion-grid">
+        <div><dt>Date</dt><dd id="suggestedEventDate">—</dd></div>
+        <div><dt>Time</dt><dd id="suggestedEventTime">—</dd></div>
+        <div><dt>Location</dt><dd id="suggestedEventLocation">—</dd></div>
+        <div><dt>Category</dt><dd id="suggestedEventCategory">General</dd></div>
+      </dl>
+
+      <p id="suggestionWarning" class="suggestion-warning hidden"></p>
+      <button id="reviewSuggestedEventBtn" class="primary-action" type="button">Review &amp; create</button>
+    </section>
   </div>
 </div>
 <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>

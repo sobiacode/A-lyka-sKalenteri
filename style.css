@@ -1628,6 +1628,148 @@ margin-bottom:12px;
   display: none;
 }
 
+.text-import-box {
+  width: min(620px, calc(100vw - 32px));
+}
+
+.text-import-box .modal-header > div {
+  min-width: 0;
+}
+
+.text-import-box .modal-header h2,
+.text-import-box .modal-header p {
+  margin: 0;
+}
+
+.text-import-box .modal-header p {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.text-import-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 14px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+#smartEventText {
+  width: 100%;
+  min-height: 170px;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 11px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+#smartEventText:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  outline: 0;
+}
+
+.text-import-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.text-import-actions button {
+  margin: 0;
+}
+
+.text-suggestion {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid #bfdbfe;
+  border-radius: 13px;
+  background: #eff6ff;
+}
+
+.suggestion-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.suggestion-heading span,
+.suggestion-heading strong {
+  display: block;
+}
+
+.suggestion-heading > div > span {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.suggestion-heading strong {
+  margin-top: 3px;
+  color: #0f172a;
+  font-size: 17px;
+}
+
+.suggestion-confidence {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #166534;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.suggestion-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 13px 0;
+}
+
+.suggestion-grid > div {
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.suggestion-grid dt {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.suggestion-grid dd {
+  margin: 3px 0 0;
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.suggestion-warning {
+  margin: 8px 0;
+  color: #9a3412;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+#reviewSuggestedEventBtn {
+  width: 100%;
+  margin: 0;
+}
+
 .toast-region {
   position: fixed;
   right: 18px;
@@ -1684,6 +1826,31 @@ margin-bottom:12px;
   border-color: #475569;
   background: #1f2937;
   color: #f8fafc;
+}
+
+.dark .text-import-box .modal-header p,
+.dark .text-import-field {
+  color: #cbd5e1;
+}
+
+.dark #smartEventText {
+  border-color: #475569;
+  background: #111827;
+  color: #f8fafc;
+}
+
+.dark .text-suggestion {
+  border-color: #1d4ed8;
+  background: #172554;
+}
+
+.dark .suggestion-heading strong,
+.dark .suggestion-grid dd {
+  color: #f8fafc;
+}
+
+.dark .suggestion-grid > div {
+  background: rgba(15, 23, 42, 0.55);
 }
 
 .dark #searchInput,
@@ -1755,6 +1922,18 @@ margin-bottom:12px;
 
   .custom-repeat-fields {
     grid-template-columns: 1fr;
+  }
+
+  .suggestion-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .text-import-actions {
+    flex-direction: column-reverse;
+  }
+
+  .text-import-actions button {
+    width: 100%;
   }
 
   .alternative-view {

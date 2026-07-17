@@ -978,6 +978,91 @@ document.querySelectorAll(".view-button").forEach(function (button) {
   });
 });
 
+const dailyQuotes = [
+  "Small steps create meaningful change.",
+  "Progress begins when you choose to start.",
+  "Give today your full attention.",
+  "Consistency turns plans into results.",
+  "A calm mind makes clearer decisions.",
+  "Focus on progress, not perfection.",
+  "Your future grows from today's choices.",
+  "Make room for what truly matters.",
+  "One completed task is worth many intentions.",
+  "Rest is part of productive progress.",
+  "A clear plan creates a lighter day.",
+  "Begin gently, but keep moving forward.",
+  "Use your time with purpose and kindness.",
+  "Every new day is a fresh starting point.",
+  "Good routines make difficult goals easier.",
+  "Celebrate the progress others cannot see.",
+  "Protect your focus and your energy.",
+  "The right pace is the one you can sustain.",
+  "Turn today's priority into today's progress.",
+  "You do not need to do everything at once.",
+  "Preparation creates confidence.",
+  "Keep your goals visible and your steps simple.",
+  "A thoughtful pause can improve the next move.",
+  "Let small wins build your momentum.",
+  "Your time deserves a clear purpose.",
+  "Do the important thing before the urgent noise.",
+  "Patience and persistence work well together.",
+  "Plan with intention, then leave room to adapt.",
+  "Today is useful even when progress feels small.",
+  "Choose one goal and move it forward.",
+  "A balanced day is a successful day.",
+  "Pienet askeleet johtavat suuriin muutoksiin.",
+  "Jokainen päivä on uusi mahdollisuus.",
+  "Keskity edistymiseen, älä täydellisyyteen.",
+  "Hyvä suunnitelma tekee päivästä kevyemmän.",
+  "Usko itseesi ja jatka eteenpäin.",
+  "Rauhallinen mieli näkee asiat selvemmin.",
+  "Tämän päivän valinnat rakentavat huomista.",
+  "Anna tärkeimmille asioille aikaa.",
+  "Yksi valmis tehtävä vie sinua eteenpäin.",
+  "Lepo kuuluu hyvään ja tasapainoiseen päivään.",
+  "Selkeä tavoite helpottaa ensimmäistä askelta.",
+  "Aloita rauhassa ja jatka määrätietoisesti.",
+  "Käytä aikaasi tarkoituksella ja lempeydellä.",
+  "Uusi päivä tarjoaa uuden alun.",
+  "Hyvät tavat tekevät tavoitteista helpompia.",
+  "Juhli myös pieniä ja näkymättömiä edistysaskelia.",
+  "Suojaa keskittymistäsi ja energiaasi.",
+  "Sopiva tahti on sellainen, jota jaksat ylläpitää.",
+  "Tee tämän päivän tärkeimmästä asiasta edistysaskel.",
+  "Kaikkea ei tarvitse tehdä yhdellä kertaa.",
+  "Hyvä valmistautuminen lisää varmuutta.",
+  "Pidä tavoitteet näkyvissä ja askeleet yksinkertaisina.",
+  "Ajateltu tauko voi parantaa seuraavaa päätöstä.",
+  "Anna pienten onnistumisten kasvattaa vauhtia.",
+  "Sinun aikasi ansaitsee selkeän tarkoituksen.",
+  "Tee tärkeä asia ennen kiireellistä hälyä.",
+  "Kärsivällisyys ja sinnikkyys toimivat yhdessä.",
+  "Suunnittele huolella ja jätä tilaa muutoksille.",
+  "Pienikin edistys tekee päivästä merkityksellisen.",
+  "Valitse yksi tavoite ja vie sitä määrätietoisesti eteenpäin.",
+  "Tasapainoinen päivä on onnistunut päivä."
+];
+
+function updateQuoteForPageLoad() {
+  const storageKey = "lastCalendarQuoteIndex";
+  const previousIndex = Number(localStorage.getItem(storageKey));
+  let quoteIndex = Math.floor(Math.random() * dailyQuotes.length);
+
+  if (
+    dailyQuotes.length > 1 &&
+    Number.isInteger(previousIndex) &&
+    quoteIndex === previousIndex
+  ) {
+    quoteIndex = (quoteIndex + 1) % dailyQuotes.length;
+  }
+
+  localStorage.setItem(storageKey, String(quoteIndex));
+  document.getElementById("quoteText").textContent =
+    "✨ " + dailyQuotes[quoteIndex];
+}
+
+updateQuoteForPageLoad();
+
 function updateClock() {
   const now = new Date();
 
@@ -995,6 +1080,7 @@ function updateClock() {
       month: "long",
       year: "numeric"
     });
+
 }
 
 setInterval(updateClock, 1000);
@@ -1774,6 +1860,10 @@ const eventModal = document.getElementById("eventModal");
 const closeEventModal = document.getElementById("closeEventModal");
 const eventModalTitle = document.getElementById("eventModalTitle");
 const modalFormError = document.getElementById("modalFormError");
+const textImportModal = document.getElementById("textImportModal");
+const smartEventText = document.getElementById("smartEventText");
+const textSuggestionPreview = document.getElementById("textSuggestionPreview");
+const textImportError = document.getElementById("textImportError");
 
 const eventDetailsText = document.getElementById("eventDetailsText");
 const eventDate = document.getElementById("eventDate");
@@ -1794,6 +1884,7 @@ let selectedEventIndex = "";
 let selectedOccurrenceDate = "";
 let selectedImageData = "";
 let eventModalMode = "edit";
+let pendingTextSuggestion = null;
 
 function calendarKeyToDateInput(key) {
   const parts = key.split("-").map(Number);
@@ -1920,6 +2011,354 @@ function openCreateEventModal(dateKey) {
     eventDetailsText.focus();
 }
 
+function formatSuggestionDate(date) {
+    return (
+        date.getFullYear() + "-" +
+        String(date.getMonth() + 1).padStart(2, "0") + "-" +
+        String(date.getDate()).padStart(2, "0")
+    );
+}
+
+function createSuggestionDate(yearValue, monthValue, dayValue) {
+    const date = new Date(yearValue, monthValue, dayValue);
+
+    if (
+        date.getFullYear() !== yearValue ||
+        date.getMonth() !== monthValue ||
+        date.getDate() !== dayValue
+    ) {
+        return null;
+    }
+
+    return date;
+}
+
+function parseSuggestedDate(text, referenceDate = new Date()) {
+    const normalized = text.toLowerCase();
+    const relativeTomorrow = /\b(tomorrow|huomenna)\b/i.test(text);
+    const relativeToday = /\b(today|tänään)\b/i.test(text);
+
+    if (relativeTomorrow || relativeToday) {
+        const relativeDate = new Date(referenceDate);
+        relativeDate.setHours(0, 0, 0, 0);
+
+        if (relativeTomorrow) {
+            relativeDate.setDate(relativeDate.getDate() + 1);
+        }
+
+        return formatSuggestionDate(relativeDate);
+    }
+
+    const isoMatch = text.match(/\b(\d{4})-(\d{1,2})-(\d{1,2})\b/);
+
+    if (isoMatch) {
+        const date = createSuggestionDate(
+            Number(isoMatch[1]),
+            Number(isoMatch[2]) - 1,
+            Number(isoMatch[3])
+        );
+
+        if (date) {
+            return formatSuggestionDate(date);
+        }
+    }
+
+    const numericMatch = text.match(
+        /\b(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})\b/
+    );
+
+    if (numericMatch) {
+        let dateYear = Number(numericMatch[3]);
+
+        if (dateYear < 100) {
+            dateYear += 2000;
+        }
+
+        const date = createSuggestionDate(
+            dateYear,
+            Number(numericMatch[2]) - 1,
+            Number(numericMatch[1])
+        );
+
+        if (date) {
+            return formatSuggestionDate(date);
+        }
+    }
+
+    const monthNames = {
+        january: 0, jan: 0, tammikuu: 0, tammikuuta: 0,
+        february: 1, feb: 1, helmikuu: 1, helmikuuta: 1,
+        march: 2, mar: 2, maaliskuu: 2, maaliskuuta: 2,
+        april: 3, apr: 3, huhtikuu: 3, huhtikuuta: 3,
+        may: 4, toukokuu: 4, toukokuuta: 4,
+        june: 5, jun: 5, kesäkuu: 5, kesäkuuta: 5,
+        july: 6, jul: 6, heinäkuu: 6, heinäkuuta: 6,
+        august: 7, aug: 7, elokuu: 7, elokuuta: 7,
+        september: 8, sep: 8, syyskuu: 8, syyskuuta: 8,
+        october: 9, oct: 9, lokakuu: 9, lokakuuta: 9,
+        november: 10, nov: 10, marraskuu: 10, marraskuuta: 10,
+        december: 11, dec: 11, joulukuu: 11, joulukuuta: 11
+    };
+    const monthPattern = Object.keys(monthNames).join("|");
+    const dayFirstMatch = normalized.match(
+        new RegExp("\\b(\\d{1,2})\\.?\\s+(" + monthPattern + ")\\s+(\\d{4})\\b", "i")
+    );
+    const monthFirstMatch = normalized.match(
+        new RegExp("\\b(" + monthPattern + ")\\s+(\\d{1,2})(?:st|nd|rd|th)?[,]?\\s+(\\d{4})\\b", "i")
+    );
+    const namedMatch = dayFirstMatch || monthFirstMatch;
+
+    if (namedMatch) {
+        const monthFirst = Boolean(monthFirstMatch);
+        const monthName = monthFirst ? namedMatch[1] : namedMatch[2];
+        const dateDay = Number(monthFirst ? namedMatch[2] : namedMatch[1]);
+        const dateYear = Number(namedMatch[3]);
+        const date = createSuggestionDate(
+            dateYear,
+            monthNames[monthName.toLowerCase()],
+            dateDay
+        );
+
+        if (date) {
+            return formatSuggestionDate(date);
+        }
+    }
+
+    const weekdays = [
+        { pattern: /\b(sunday|sunnuntai(?:na)?)\b/i, day: 0 },
+        { pattern: /\b(monday|maanantai(?:na)?)\b/i, day: 1 },
+        { pattern: /\b(tuesday|tiistai(?:na)?)\b/i, day: 2 },
+        { pattern: /\b(wednesday|keskiviikko(?:na)?)\b/i, day: 3 },
+        { pattern: /\b(thursday|torstai(?:na)?)\b/i, day: 4 },
+        { pattern: /\b(friday|perjantai(?:na)?)\b/i, day: 5 },
+        { pattern: /\b(saturday|lauantai(?:na)?)\b/i, day: 6 }
+    ];
+    const weekday = weekdays.find(function (item) {
+        return item.pattern.test(text);
+    });
+
+    if (weekday) {
+        const date = new Date(referenceDate);
+        let offset = (weekday.day - date.getDay() + 7) % 7;
+
+        if (offset === 0 && /\b(next|ensi)\b/i.test(text)) {
+            offset = 7;
+        }
+
+        date.setDate(date.getDate() + offset);
+        return formatSuggestionDate(date);
+    }
+
+    return "";
+}
+
+function normalizeSuggestedTime(hourValue, minuteValue) {
+    const hour = Number(hourValue);
+    const minute = Number(minuteValue || 0);
+
+    if (hour > 23 || minute > 59) {
+        return "";
+    }
+
+    return String(hour).padStart(2, "0") + ":" + String(minute).padStart(2, "0");
+}
+
+function parseSuggestedTimes(text) {
+    const rangeMatch = text.match(
+        /(?:\b(?:time|aika|klo|at)\s*:?[ ]*)?\b([01]?\d|2[0-3])[:.]([0-5]\d)\s*(?:-|–|—|to|until)\s*([01]?\d|2[0-3])[:.]([0-5]\d)\b/i
+    );
+
+    if (rangeMatch) {
+        return {
+            startTime: normalizeSuggestedTime(rangeMatch[1], rangeMatch[2]),
+            endTime: normalizeSuggestedTime(rangeMatch[3], rangeMatch[4])
+        };
+    }
+
+    const labelledTime = text.match(
+        /\b(?:time|aika|klo|at)\s*:?[ ]*([01]?\d|2[0-3])[:.]([0-5]\d)\b/i
+    );
+    const colonTime = text.match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);
+    const timeMatch = labelledTime || colonTime;
+
+    return {
+        startTime: timeMatch
+            ? normalizeSuggestedTime(timeMatch[1], timeMatch[2])
+            : "",
+        endTime: ""
+    };
+}
+
+function parseSuggestedLocation(text) {
+    const locationMatch = text.match(
+        /^(?:location|place|venue|paikka|sijainti)\s*:\s*(.+)$/im
+    );
+
+    return locationMatch ? locationMatch[1].trim() : "";
+}
+
+function parseSuggestedTitle(text) {
+    const subjectMatch = text.match(/^(?:subject|aihe|otsikko)\s*:\s*(.+)$/im);
+
+    if (subjectMatch) {
+        return subjectMatch[1].trim();
+    }
+
+    const ignoredLine = /^(?:date|päivä|time|aika|klo|location|place|venue|paikka|sijainti)\s*:/i;
+    const firstUsefulLine = text
+        .split(/\r?\n/)
+        .map(function (line) { return line.trim(); })
+        .find(function (line) {
+            return line && !ignoredLine.test(line);
+        });
+
+    return firstUsefulLine || "Untitled event";
+}
+
+function detectSuggestedCategory(text) {
+    if (/\b(exam|test|koe|tentti)\b/i.test(text)) {
+        return "Exam";
+    }
+
+    if (/\b(birthday|syntymäpäivä|synttärit)\b/i.test(text)) {
+        return "Birthday";
+    }
+
+    if (/\b(meeting|appointment|tapaaminen|palaveri|kokous)\b/i.test(text)) {
+        return "Meeting";
+    }
+
+    return "General";
+}
+
+function parseEventSuggestion(text, referenceDate = new Date()) {
+    const times = parseSuggestedTimes(text);
+    const date = parseSuggestedDate(text, referenceDate);
+    const title = parseSuggestedTitle(text);
+    const location = parseSuggestedLocation(text);
+    const category = detectSuggestedCategory(text);
+    const missing = [];
+
+    if (!date) missing.push("date");
+    if (!times.startTime) missing.push("time");
+    if (!location) missing.push("location");
+
+    const detectedCount =
+        Number(Boolean(date)) +
+        Number(Boolean(times.startTime)) +
+        Number(Boolean(location)) +
+        Number(title !== "Untitled event");
+
+    return {
+        title: title,
+        date: date,
+        startTime: times.startTime,
+        endTime: times.endTime,
+        location: location,
+        category: category,
+        notes: text.trim(),
+        missing: missing,
+        confidence: detectedCount >= 4
+            ? "High confidence"
+            : detectedCount >= 2
+                ? "Review details"
+                : "Low confidence"
+    };
+}
+
+function closeTextImportWindow() {
+    textImportModal.classList.add("hidden");
+    textImportError.classList.add("hidden");
+}
+
+function showTextSuggestion(suggestion) {
+    const displayDate = suggestion.date
+        ? new Date(suggestion.date + "T12:00:00").toLocaleDateString("en-GB", {
+            weekday: "short",
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+          })
+        : "Not detected";
+    const displayTime = suggestion.startTime
+        ? suggestion.startTime +
+          (suggestion.endTime ? "–" + suggestion.endTime : "")
+        : "Not detected";
+
+    document.getElementById("suggestedEventTitle").textContent = suggestion.title;
+    document.getElementById("suggestedEventDate").textContent = displayDate;
+    document.getElementById("suggestedEventTime").textContent = displayTime;
+    document.getElementById("suggestedEventLocation").textContent =
+        suggestion.location || "Not detected";
+    document.getElementById("suggestedEventCategory").textContent = suggestion.category;
+    document.getElementById("suggestionConfidence").textContent = suggestion.confidence;
+
+    const warning = document.getElementById("suggestionWarning");
+    warning.textContent = suggestion.missing.length
+        ? "Please review: " + suggestion.missing.join(", ") + " not detected."
+        : "";
+    warning.classList.toggle("hidden", suggestion.missing.length === 0);
+    textSuggestionPreview.classList.remove("hidden");
+}
+
+document.getElementById("createFromTextBtn").addEventListener("click", function () {
+    pendingTextSuggestion = null;
+    smartEventText.value = "";
+    textSuggestionPreview.classList.add("hidden");
+    textImportError.classList.add("hidden");
+    textImportModal.classList.remove("hidden");
+    smartEventText.focus();
+});
+
+document.getElementById("analyzeEventTextBtn").addEventListener("click", function () {
+    const messageText = smartEventText.value.trim();
+
+    if (!messageText) {
+        textImportError.textContent = "Paste an email or message first.";
+        textImportError.classList.remove("hidden");
+        return;
+    }
+
+    textImportError.classList.add("hidden");
+    pendingTextSuggestion = parseEventSuggestion(messageText);
+    showTextSuggestion(pendingTextSuggestion);
+});
+
+document.getElementById("reviewSuggestedEventBtn").addEventListener("click", function () {
+    if (!pendingTextSuggestion) {
+        return;
+    }
+
+    const now = new Date();
+    const fallbackDate = formatSuggestionDate(now);
+    const suggestedDate = pendingTextSuggestion.date || fallbackDate;
+    const dateKey = dateInputToCalendarKey(suggestedDate);
+
+    closeTextImportWindow();
+    openCreateEventModal(dateKey);
+    eventDetailsText.value = pendingTextSuggestion.title;
+    eventDate.value = suggestedDate;
+    document.getElementById("eventEndDate").value = suggestedDate;
+    document.getElementById("eventCategory").value = pendingTextSuggestion.category;
+    document.getElementById("eventTimeInput").value = pendingTextSuggestion.startTime;
+    document.getElementById("eventEndTimeInput").value = pendingTextSuggestion.endTime;
+    document.getElementById("eventAllDayInput").checked =
+        !pendingTextSuggestion.startTime;
+    document.getElementById("eventLocationInput").value =
+        pendingTextSuggestion.location;
+    document.getElementById("eventNotesInput").value = pendingTextSuggestion.notes;
+    updateAllDayFields();
+});
+
+document.getElementById("closeTextImportModal").addEventListener(
+    "click",
+    closeTextImportWindow
+);
+document.getElementById("cancelTextImport").addEventListener(
+    "click",
+    closeTextImportWindow
+);
+
 function closeEventModalWindow() {
     resetDeleteConfirmation();
     clearModalFormError();
@@ -1947,15 +2386,21 @@ document.getElementById("eventAllDayInput").addEventListener(
 );
 
 document.addEventListener("keydown", function (event) {
-    if (eventModal.classList.contains("hidden")) {
-        return;
-    }
-
     const isEscape = event.key === "Escape";
     const isCommandPeriod =
         (event.metaKey || event.ctrlKey) && event.key === ".";
 
-    if (isEscape || isCommandPeriod) {
+    if (!(isEscape || isCommandPeriod)) {
+        return;
+    }
+
+    if (!textImportModal.classList.contains("hidden")) {
+        event.preventDefault();
+        closeTextImportWindow();
+        return;
+    }
+
+    if (!eventModal.classList.contains("hidden")) {
         event.preventDefault();
         closeEventModalWindow();
     }
