@@ -179,45 +179,52 @@
           <p id="meetingCount">Tapaamiset: 0</p>
           <p id="birthdayCount">Syntymäpäivät: 0</p>
         </div>
-      <div class="schedule-box">
-  <h3>📋 Aikataulu</h3>
-
-  <ul id="scheduleList"></ul>
-</div>
-
-        <div class="reminder-box">
-          <h3>Muistutukset</h3>
-          <ul id="reminderList"></ul>
-
-          <button id="checkReminderBtn">🔔 Tarkista muistutukset</button>
-          <button id="enableNotificationsBtn" class="secondary-button" type="button">Enable notifications</button>
-
-          <p id="timerDisplay">00:00</p>
-
-          <label for="soundSelect">🔊 Valitse ääni:</label>
-
-          <select id="soundSelect">
-            <option value="beep">Beep/Piippaus</option>
-            <option value="bell">Bell</option>
-            <option value="alarm">Alarm</option>
-            <option value="digital">Digital</option>
-            <option value="notification">Notification</option>
-            <option value="ring">Ring</option>
-          </select>
-
-          <div class="timer-controls">
-            <button id="startTimerBtn">▶ Käynnistä ajastin</button>
-            <button id="pauseTimerBtn">⏸ Tauko</button>
-            <button id="snoozeBtn">😴 Snooze/Torkku +5 s+5s</button>
+        <details class="sidebar-section schedule-box" open>
+          <summary>📋 Aikataulu</summary>
+          <div class="sidebar-section-content">
+            <ul id="scheduleList" class="is-collapsed"></ul>
+            <button id="toggleScheduleListBtn" class="sidebar-list-toggle secondary-button hidden" type="button">Näytä kaikki</button>
           </div>
-        </div>
+        </details>
 
-<section class="calculator-box" aria-labelledby="calculatorTitle">
+        <details class="sidebar-section reminder-box" open>
+          <summary>🔔 Muistutukset</summary>
+          <div class="sidebar-section-content">
+            <ul id="reminderList" class="is-collapsed"></ul>
+            <button id="toggleReminderListBtn" class="sidebar-list-toggle secondary-button hidden" type="button">Näytä kaikki</button>
+            <button id="checkReminderBtn">🔔 Tarkista muistutukset</button>
+            <button id="enableNotificationsBtn" class="secondary-button" type="button">Enable notifications</button>
+          </div>
+        </details>
+
+        <details class="sidebar-section timer-box">
+          <summary>⏱ Ajastin</summary>
+          <div class="sidebar-section-content">
+            <p id="timerDisplay">00:00</p>
+
+            <label for="soundSelect">🔊 Valitse ääni:</label>
+
+            <select id="soundSelect">
+              <option value="beep">Beep/Piippaus</option>
+              <option value="bell">Bell</option>
+              <option value="alarm">Alarm</option>
+              <option value="digital">Digital</option>
+              <option value="notification">Notification</option>
+              <option value="ring">Ring</option>
+            </select>
+
+            <div class="timer-controls">
+              <button id="startTimerBtn">▶ Käynnistä ajastin</button>
+              <button id="pauseTimerBtn">⏸ Tauko</button>
+              <button id="snoozeBtn">😴 Snooze/Torkku +5 s+5s</button>
+            </div>
+          </div>
+        </details>
+
+<details class="calculator-box sidebar-section" aria-labelledby="calculatorTitle">
+  <summary id="calculatorTitle">🧮 Laskuri <span>Numbers, dates &amp; time</span></summary>
+  <div class="sidebar-section-content">
   <div class="calculator-header">
-    <div>
-      <h3 id="calculatorTitle">🧮 Laskuri</h3>
-      <span>Numbers, dates &amp; time</span>
-    </div>
     <button id="clearCalculatorBtn" type="button" aria-label="Tyhjennä laskuri">AC</button>
   </div>
 
@@ -270,7 +277,8 @@
     <button id="calculateTimeBtn" class="calculator-wide-button" type="button">Laske kesto</button>
     <output id="timeCalcResult" class="calculator-result" aria-live="polite">Valitse ajat</output>
   </div>
-</section>
+  </div>
+</details>
       </div>
 
     </div>

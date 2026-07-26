@@ -105,6 +105,16 @@ button:hover {
   gap: 15px;
 }
 
+.right-panel {
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-width: thin;
+}
+
 .weather-box {
   padding: 14px;
   border: 1px solid #dbeafe;
@@ -289,13 +299,74 @@ button:hover {
 .quote-box,
 .event-list-box,
 .stats-box,
-.reminder-box 
+.reminder-box,
 .schedule-box {
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
   padding: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.sidebar-section {
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+.sidebar-section > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 13px 14px;
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.sidebar-section > summary::-webkit-details-marker {
+  display: none;
+}
+
+.sidebar-section > summary::after {
+  content: "›";
+  color: #64748b;
+  font-size: 21px;
+  line-height: 1;
+  transform: rotate(90deg);
+  transition: transform 0.18s ease;
+}
+
+.sidebar-section[open] > summary::after {
+  transform: rotate(-90deg);
+}
+
+.sidebar-section > summary:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.24);
+  outline-offset: -3px;
+}
+
+.sidebar-section-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.sidebar-list-toggle {
+  width: 100%;
+  margin: 2px 0 0;
+}
+
+#scheduleList.is-collapsed > li:nth-child(n + 6),
+#reminderList.is-collapsed > li:nth-child(n + 6) {
+  display: none;
 }
 
 .quote-box {
@@ -343,9 +414,7 @@ button:hover {
 }
 
 .reminder-box {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  padding: 0;
 }
 
 .reminder-box ul {
@@ -368,6 +437,21 @@ button:hover {
   width: 150px;
 }
 
+.timer-box select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+}
+
+#timerDisplay {
+  margin: 2px 0;
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+}
+
 .timer-controls {
   display: flex;
   gap: 8px;
@@ -379,17 +463,24 @@ button:hover {
 }
 
 .calculator-box {
-  padding: 14px;
+  padding: 0;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
   background: #fff;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
 }
 
+.calculator-box > summary span {
+  margin-right: auto;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 600;
+}
+
 .calculator-header {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 10px;
 }
 
@@ -539,6 +630,8 @@ footer {
 .dark .event-list-box,
 .dark .stats-box,
 .dark .reminder-box,
+.dark .schedule-box,
+.dark .timer-box,
 .dark .weather-box,
 .dark .calculator-box {
   background: #1f2937;
@@ -561,6 +654,25 @@ footer {
 .dark .calculator-header span,
 .dark .calculator-section label {
   color: #cbd5e1;
+}
+
+.dark .sidebar-section {
+  border-color: #334155;
+}
+
+.dark .sidebar-section > summary {
+  color: #f8fafc;
+}
+
+.dark .sidebar-section > summary::after,
+.dark .calculator-box > summary span {
+  color: #94a3b8;
+}
+
+.dark .timer-box select {
+  border-color: #475569;
+  background: #0f172a;
+  color: #f8fafc;
 }
 
 .dark .calculator-section {
@@ -628,6 +740,10 @@ footer {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
+    position: static;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
   }
 
   .weekdays,

@@ -644,6 +644,42 @@ function addEmptyAgendaMessage(list, message) {
   list.appendChild(emptyItem);
 }
 
+const SIDEBAR_LIST_PREVIEW_LIMIT = 5;
+
+function syncSidebarListToggle(listId, buttonId) {
+  const list = document.getElementById(listId);
+  const button = document.getElementById(buttonId);
+
+  if (!list || !button) {
+    return;
+  }
+
+  const hasMoreItems = list.children.length > SIDEBAR_LIST_PREVIEW_LIMIT;
+  button.classList.toggle("hidden", !hasMoreItems);
+
+  if (!hasMoreItems) {
+    list.classList.add("is-collapsed");
+  }
+
+  const isCollapsed = list.classList.contains("is-collapsed");
+  button.textContent = isCollapsed ? "Näytä kaikki" : "Näytä vähemmän";
+  button.setAttribute("aria-expanded", String(!isCollapsed));
+}
+
+function setupSidebarListToggle(listId, buttonId) {
+  const list = document.getElementById(listId);
+  const button = document.getElementById(buttonId);
+
+  if (!list || !button) {
+    return;
+  }
+
+  button.addEventListener("click", function () {
+    list.classList.toggle("is-collapsed");
+    syncSidebarListToggle(listId, buttonId);
+  });
+}
+
 function updateScheduleList() {
   const scheduleList = document.getElementById("scheduleList");
   const daysInMonth = getDaysInMonth(month, year);
@@ -671,6 +707,8 @@ function updateScheduleList() {
   if (!scheduleList.children.length) {
     addEmptyAgendaMessage(scheduleList, "Ei tapahtumia tässä kuussa.");
   }
+
+  syncSidebarListToggle("scheduleList", "toggleScheduleListBtn");
 }
 
 function getViewAnchorDate() {
@@ -920,7 +958,12 @@ function updateReminders() {
   if (!reminderList.children.length) {
     addEmptyAgendaMessage(reminderList, "Ei muistutuksia seuraavalle 7 päivälle.");
   }
+
+  syncSidebarListToggle("reminderList", "toggleReminderListBtn");
 }
+
+setupSidebarListToggle("scheduleList", "toggleScheduleListBtn");
+setupSidebarListToggle("reminderList", "toggleReminderListBtn");
 
 document.getElementById("prevBtn").onclick = function () {
   month--;
