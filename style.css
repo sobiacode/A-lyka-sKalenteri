@@ -1602,6 +1602,74 @@ margin-bottom:12px;
   color: #9d174d !important;
 }
 
+.calendar-event.event-theme-nature,
+.agenda-event.event-theme-nature {
+  --event-accent: #16a34a;
+  --event-soft: #dcfce7;
+  --event-text: #14532d;
+}
+
+.calendar-event.event-theme-ocean,
+.agenda-event.event-theme-ocean {
+  --event-accent: #2563eb;
+  --event-soft: #dbeafe;
+  --event-text: #1e3a8a;
+}
+
+.calendar-event.event-theme-lavender,
+.agenda-event.event-theme-lavender {
+  --event-accent: #7c3aed;
+  --event-soft: #ede9fe;
+  --event-text: #4c1d95;
+}
+
+.calendar-event.event-theme-rose,
+.agenda-event.event-theme-rose {
+  --event-accent: #e11d48;
+  --event-soft: #ffe4e6;
+  --event-text: #881337;
+}
+
+.calendar-event.event-theme-sunset,
+.agenda-event.event-theme-sunset {
+  --event-accent: #f97316;
+  --event-soft: #ffedd5;
+  --event-text: #9a3412;
+}
+
+.calendar-event.event-theme-slate,
+.agenda-event.event-theme-slate {
+  --event-accent: #475569;
+  --event-soft: #e2e8f0;
+  --event-text: #1e293b;
+}
+
+.calendar-event[class*="event-theme-"],
+.agenda-event[class*="event-theme-"] {
+  border-color: var(--event-accent);
+  background: var(--event-soft) !important;
+  color: var(--event-text) !important;
+  box-shadow: inset 4px 0 0 var(--event-accent);
+}
+
+.calendar-event[class*="event-theme-"] {
+  padding-left: 9px;
+}
+
+.agenda-event[class*="event-theme-"] {
+  border-left-width: 2px;
+  padding-left: 14px;
+}
+
+.agenda-event[class*="event-theme-"] .agenda-event-date {
+  color: var(--event-accent);
+}
+
+.calendar-event[class*="event-theme-"]:hover,
+.agenda-event[class*="event-theme-"]:hover {
+  filter: brightness(0.97);
+}
+
 .calendar-event-time {
   margin-right: 4px;
   opacity: 0.76;

@@ -512,6 +512,12 @@ function createDays() {
               item.occurrenceEndDate || occurrenceStartDate;
             const categoryClass =
               "category-" + category.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+            const theme =
+              item && typeof item === "object"
+                ? item.theme || "nature"
+                : "nature";
+            const themeClass =
+              "event-theme-" + theme.toLowerCase().replace(/[^a-z0-9]+/g, "-");
             const timeText = item.time
               ? '<span class="calendar-event-time">' + escapeHtml(item.time) + "</span>"
               : "";
@@ -532,7 +538,7 @@ function createDays() {
 
             if (index < 3) {
               eventHtml +=
-                '<small class="calendar-event ' + categoryClass + '" data-date="' + key + '" data-index="' + index + '" data-source-date="' + sourceDate + '" data-source-index="' + sourceIndex + '" data-occurrence-start="' + occurrenceStartDate + '" data-occurrence-end="' + occurrenceEndDate + '">' +
+                '<small class="calendar-event ' + categoryClass + " " + themeClass + '" data-date="' + key + '" data-index="' + index + '" data-source-date="' + sourceDate + '" data-source-index="' + sourceIndex + '" data-occurrence-start="' + occurrenceStartDate + '" data-occurrence-end="' + occurrenceEndDate + '">' +
                 timeText + escapeHtml(title) + photoIcon +
                 "</small>";
             }
@@ -613,9 +619,12 @@ function createAgendaItem(eventItem, dateKey, fallbackIndex, dateLabel) {
   const timeText = eventItem.time
     ? eventItem.time + (eventItem.endTime ? "–" + eventItem.endTime : "")
     : "";
+  const theme = eventItem.theme || "nature";
+  const themeClass =
+    "event-theme-" + theme.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
   button.type = "button";
-  button.className = "agenda-event";
+  button.className = "agenda-event " + themeClass;
   button.dataset.date = dateKey;
   button.dataset.sourceDate = sourceDate;
   button.dataset.sourceIndex = sourceIndex;
