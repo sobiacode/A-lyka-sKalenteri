@@ -1045,6 +1045,29 @@ margin-bottom:12px;
   grid-column: 1 / -1;
 }
 
+.location-link-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.location-link-row button {
+  min-height: 36px;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.location-link-row button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.field-help {
+  color: #64748b;
+  font-size: 11px;
+}
+
 .event-modal-grid input,
 .event-modal-grid select,
 .event-modal-grid textarea {
@@ -1331,6 +1354,10 @@ margin-bottom:12px;
 
   .modal-field-wide {
     grid-column: auto;
+  }
+
+  .location-link-row {
+    grid-template-columns: 1fr;
   }
 
   .modal-footer-actions,

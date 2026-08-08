@@ -369,6 +369,7 @@ function createEvent(title, category = "General", image = "") {
         image: image,
         images: [],
         location: "",
+        mapLink: "",
         time: "",
         endTime: "",
         endDate: "",
@@ -377,6 +378,52 @@ function createEvent(title, category = "General", image = "") {
         theme: "nature",
         repeat: "none"
     };
+}
+
+function normalizeGoogleMapsLink(value) {
+  const trimmedValue = String(value || "").trim();
+
+  if (!trimmedValue) {
+    return "";
+  }
+
+  try {
+    const parsedUrl = new URL(trimmedValue);
+    const hostname = parsedUrl.hostname.toLowerCase();
+    const isGoogleDomain =
+      hostname === "google.com" ||
+      hostname.endsWith(".google.com") ||
+      /^(?:www\.|maps\.)?google\.[a-z]{2,3}(?:\.[a-z]{2})?$/.test(hostname);
+    const isGoogleMapsLink =
+      hostname === "maps.app.goo.gl" ||
+      (hostname === "goo.gl" && parsedUrl.pathname.startsWith("/maps")) ||
+      (isGoogleDomain && parsedUrl.pathname.includes("/maps"));
+
+    return parsedUrl.protocol === "https:" && isGoogleMapsLink
+      ? parsedUrl.href
+      : "";
+  } catch (error) {
+    return "";
+  }
+}
+
+function getEventMapUrl(eventItem) {
+  if (!eventItem || typeof eventItem !== "object") {
+    return "";
+  }
+
+  const exactMapLink = normalizeGoogleMapsLink(eventItem.mapLink);
+
+  if (exactMapLink) {
+    return exactMapLink;
+  }
+
+  const locationName = String(eventItem.location || "").trim();
+
+  return locationName
+    ? "https://www.google.com/maps/search/?api=1&query=" +
+        encodeURIComponent(locationName)
+    : "";
 }
 
 function getDaysInMonth(month, year) {
@@ -1410,7 +1457,196 @@ document.getElementById("enableNotificationsBtn").addEventListener("click", asyn
   }
 });
 
-function checkDueEventReminders() {
+function parseStoredEventDate(dateKey) {
+  const parts = String(dateKey || "").split("-").map(Number);
+
+  if (parts.length !== 3 || parts.some(Number.isNaN)) {
+    return null;
+  }
+
+  const parsedDate = new Date(parts[0], parts[1], parts[2]);
+
+  if (
+    parsedDate.getFullYear() !== parts[0] ||
+    parsedDate.getMonth() !== parts[1] ||
+    parsedDate.getDate() !== parts[2]
+  ) {
+    return null;
+  }
+
+  parsedDate.setHours(0, 0, 0, 0);
+  return parsedDate;
+}
+
+function connectNotificationToEventMap(notification, eventItem) {
+  const mapUrl = getEventMapUrl(eventItem);
+
+  if (!mapUrl) {
+    return;
+  }
+
+  notification.onclick = function () {
+    window.open(mapUrl, "_blank", "noopener");
+    notification.close();
+  };
+}
+
+async function getEventDayWeatherSummary(eventItem) {
+  const locationQuery = String(eventItem && eventItem.location || "").trim();
+  let latitude = 61.566942;
+  let longitude = 21.813336;
+  let weatherLocation = "Pori";
+
+  try {
+    if (locationQuery) {
+      const locationWords = locationQuery.split(/[,\s]+/).filter(Boolean);
+      const searchCandidates = Array.from(new Set([
+        locationQuery,
+        locationWords[0],
+        locationWords[locationWords.length - 1]
+      ].filter(Boolean)));
+      let locationResult = null;
+
+      for (const searchLocation of searchCandidates) {
+        const geocodingUrl =
+          "https://geocoding-api.open-meteo.com/v1/search?name=" +
+          encodeURIComponent(searchLocation) +
+          "&count=1&language=en&format=json";
+        const geocodingResponse = await fetch(geocodingUrl);
+
+        if (!geocodingResponse.ok) {
+          continue;
+        }
+
+        const geocodingData = await geocodingResponse.json();
+        locationResult = geocodingData.results && geocodingData.results[0];
+
+        if (locationResult) {
+          break;
+        }
+      }
+
+      if (!locationResult) {
+        return "";
+      }
+
+      latitude = locationResult.latitude;
+      longitude = locationResult.longitude;
+      weatherLocation = locationResult.name || locationQuery;
+    }
+
+    const forecastUrl =
+      "https://api.open-meteo.com/v1/forecast?latitude=" +
+      encodeURIComponent(latitude) +
+      "&longitude=" + encodeURIComponent(longitude) +
+      "&current=temperature_2m,weather_code,wind_speed_10m" +
+      "&daily=precipitation_probability_max" +
+      "&timezone=auto&forecast_days=1";
+    const forecastResponse = await fetch(forecastUrl);
+
+    if (!forecastResponse.ok) {
+      return "";
+    }
+
+    const weatherData = await forecastResponse.json();
+
+    if (!weatherData.current || !weatherData.daily) {
+      return "";
+    }
+
+    const weatherDescription = getWeatherDescription(
+      Number(weatherData.current.weather_code)
+    );
+    const temperature = Number(weatherData.current.temperature_2m);
+    const rainProbability = Number(
+      weatherData.daily.precipitation_probability_max &&
+      weatherData.daily.precipitation_probability_max[0]
+    );
+
+    if (!Number.isFinite(temperature)) {
+      return "";
+    }
+
+    return weatherLocation + ": " +
+      weatherDescription[0] + " " + weatherDescription[1] + ", " +
+      Math.round(temperature) + "°C, " +
+      "rain " + (Number.isFinite(rainProbability)
+        ? Math.round(rainProbability)
+        : 0) + "%, wind " +
+      Math.round(Number(weatherData.current.wind_speed_10m) || 0) + " km/h.";
+  } catch (error) {
+    return "";
+  }
+}
+
+async function checkDailyUntilEventReminders(now, sentReminders) {
+  const today = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
+  const todayKey =
+    today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate();
+
+  for (const sourceDate of Object.keys(events)) {
+    const eventDate = parseStoredEventDate(sourceDate);
+
+    if (!eventDate || eventDate < today) {
+      continue;
+    }
+
+    const storedEvents = Array.isArray(events[sourceDate])
+      ? events[sourceDate]
+      : [events[sourceDate]];
+
+    for (let sourceIndex = 0; sourceIndex < storedEvents.length; sourceIndex++) {
+      const item = storedEvents[sourceIndex];
+
+      if (
+        !item ||
+        typeof item !== "object" ||
+        item.reminder !== "daily-until"
+      ) {
+        continue;
+      }
+
+      const reminderId =
+        "daily-until:" + sourceDate + ":" + sourceIndex + ":" + todayKey;
+
+      if (sentReminders[reminderId]) {
+        continue;
+      }
+
+      const daysUntilEvent = Math.round(
+        (eventDate.getTime() - today.getTime()) / 86400000
+      );
+      const dateLabel = eventDate.toLocaleDateString("en-GB");
+      const countdownText = daysUntilEvent === 0
+        ? "The event is today."
+        : daysUntilEvent +
+          (daysUntilEvent === 1 ? " day" : " days") +
+          " until the event.";
+      const weatherSummary = daysUntilEvent === 0
+        ? await getEventDayWeatherSummary(item)
+        : "";
+      const notification = new Notification(
+        "Daily reminder: " + getEventTitle(item),
+        {
+          body:
+            (item.location ? item.location + " · " : "") +
+            countdownText + " Event date: " + dateLabel +
+            (weatherSummary ? " Weather: " + weatherSummary : ""),
+          tag: reminderId
+        }
+      );
+
+      connectNotificationToEventMap(notification, item);
+      sentReminders[reminderId] = now.getTime();
+    }
+  }
+}
+
+async function checkDueEventReminders() {
   if (!("Notification" in window) || Notification.permission !== "granted") {
     return;
   }
@@ -1426,6 +1662,8 @@ function checkDueEventReminders() {
     }
   });
 
+  await checkDailyUntilEventReminders(now, sentReminders);
+
   for (let offset = 0; offset <= 2; offset++) {
     const date = new Date(now);
     date.setDate(now.getDate() + offset);
@@ -1437,7 +1675,8 @@ function checkDueEventReminders() {
         typeof item !== "object" ||
         !item.time ||
         !item.reminder ||
-        item.reminder === "none"
+        item.reminder === "none" ||
+        item.reminder === "daily-until"
       ) {
         return;
       }
@@ -1467,12 +1706,13 @@ function checkDueEventReminders() {
         millisecondsUntilEvent <= reminderMinutes * 60000 &&
         !sentReminders[reminderId]
       ) {
-        new Notification(getEventTitle(item), {
+        const notification = new Notification(getEventTitle(item), {
           body:
             (item.location ? item.location + " · " : "") +
             "Starts at " + item.time,
           tag: reminderId
         });
+        connectNotificationToEventMap(notification, item);
         sentReminders[reminderId] = now.getTime();
       }
     });
@@ -1919,6 +2159,9 @@ const textImportError = document.getElementById("textImportError");
 
 const eventDetailsText = document.getElementById("eventDetailsText");
 const eventDate = document.getElementById("eventDate");
+const eventLocationInput = document.getElementById("eventLocationInput");
+const eventMapLinkInput = document.getElementById("eventMapLinkInput");
+const openEventMapBtn = document.getElementById("openEventMapBtn");
 
 const modalEventImage = document.getElementById("modalEventImage");
 const eventImagePreview = document.getElementById("eventImagePreview");
@@ -2020,6 +2263,37 @@ function updateAllDayFields() {
     document.getElementById("eventEndTimeInput").disabled = allDay;
 }
 
+function updateOpenEventMapButton() {
+    const rawMapLink = eventMapLinkInput.value.trim();
+    const exactMapLink = normalizeGoogleMapsLink(rawMapLink);
+    const hasLocationName = Boolean(eventLocationInput.value.trim());
+
+    openEventMapBtn.disabled = rawMapLink
+        ? !exactMapLink
+        : !hasLocationName;
+    openEventMapBtn.textContent = exactMapLink
+        ? "Open exact pin"
+        : "Open in Maps";
+}
+
+function openCurrentEventMap() {
+    const rawMapLink = eventMapLinkInput.value.trim();
+    const exactMapLink = normalizeGoogleMapsLink(rawMapLink);
+    const locationName = eventLocationInput.value.trim();
+    const mapUrl = exactMapLink || (
+        !rawMapLink && locationName
+            ? "https://www.google.com/maps/search/?api=1&query=" +
+                encodeURIComponent(locationName)
+            : ""
+    );
+
+    if (!mapUrl) {
+        return;
+    }
+
+    window.open(mapUrl, "_blank", "noopener");
+}
+
 function resetEventModalFields(dateKey) {
     const dateValue = calendarKeyToDateInput(dateKey);
 
@@ -2030,7 +2304,8 @@ function resetEventModalFields(dateKey) {
     document.getElementById("eventTimeInput").value = "";
     document.getElementById("eventEndTimeInput").value = "";
     document.getElementById("eventAllDayInput").checked = false;
-    document.getElementById("eventLocationInput").value = "";
+    eventLocationInput.value = "";
+    eventMapLinkInput.value = "";
     document.getElementById("eventNotesInput").value = "";
     document.getElementById("eventThemeInput").value = "nature";
     document.getElementById("eventRepeatInput").value = "none";
@@ -2047,6 +2322,7 @@ function resetEventModalFields(dateKey) {
     resetDeleteConfirmation();
     updateCustomRepeatVisibility();
     updateAllDayFields();
+    updateOpenEventMapButton();
 }
 
 function openCreateEventModal(dateKey) {
@@ -2396,10 +2672,11 @@ document.getElementById("reviewSuggestedEventBtn").addEventListener("click", fun
     document.getElementById("eventEndTimeInput").value = pendingTextSuggestion.endTime;
     document.getElementById("eventAllDayInput").checked =
         !pendingTextSuggestion.startTime;
-    document.getElementById("eventLocationInput").value =
-        pendingTextSuggestion.location;
+    eventLocationInput.value = pendingTextSuggestion.location;
+    eventMapLinkInput.value = "";
     document.getElementById("eventNotesInput").value = pendingTextSuggestion.notes;
     updateAllDayFields();
+    updateOpenEventMapButton();
 });
 
 document.getElementById("closeTextImportModal").addEventListener(
@@ -2436,6 +2713,9 @@ document.getElementById("eventAllDayInput").addEventListener(
     "change",
     updateAllDayFields
 );
+eventLocationInput.addEventListener("input", updateOpenEventMapButton);
+eventMapLinkInput.addEventListener("input", updateOpenEventMapButton);
+openEventMapBtn.addEventListener("click", openCurrentEventMap);
 
 document.addEventListener("keydown", function (event) {
     const isEscape = event.key === "Escape";
@@ -2557,8 +2837,8 @@ document.getElementById("eventEndTimeInput").value =
 document.getElementById("eventAllDayInput").checked =
     Boolean(clickedEvent.allDay);
 
-document.getElementById("eventLocationInput").value =
-    clickedEvent.location || "";
+eventLocationInput.value = clickedEvent.location || "";
+eventMapLinkInput.value = clickedEvent.mapLink || "";
 
 document.getElementById("eventNotesInput").value =
     clickedEvent.notes || "";
@@ -2584,6 +2864,7 @@ resetDeleteConfirmation();
 clearModalFormError();
 updateCustomRepeatVisibility();
 updateAllDayFields();
+updateOpenEventMapButton();
 eventModalTitle.textContent = "📅 Event details";
 document.getElementById("saveEventDetails").textContent = "Save changes";
 deleteEventBtn.classList.remove("hidden");
@@ -2667,6 +2948,9 @@ document.getElementById("saveEventDetails").addEventListener("click", function (
     const repeatUntil = repeatUntilValue
         ? dateInputToCalendarKey(repeatUntilValue)
         : "";
+    const locationName = eventLocationInput.value.trim();
+    const rawMapLink = eventMapLinkInput.value.trim();
+    const normalizedMapLink = normalizeGoogleMapsLink(rawMapLink);
 
     if (!updatedTitle) {
         showModalFormError("Please enter an event title.");
@@ -2676,6 +2960,12 @@ document.getElementById("saveEventDetails").addEventListener("click", function (
 
     if (!updatedDate || !updatedEndDate) {
         showModalFormError("Please select valid start and end dates.");
+        return;
+    }
+
+    if (rawMapLink && !normalizedMapLink) {
+        showModalFormError("Please paste a valid HTTPS Google Maps link.");
+        eventMapLinkInput.focus();
         return;
     }
 
@@ -2712,7 +3002,8 @@ document.getElementById("saveEventDetails").addEventListener("click", function (
         time: updatedStartTime,
         endTime: updatedEndTime,
         allDay: allDay,
-        location: document.getElementById("eventLocationInput").value.trim(),
+        location: locationName,
+        mapLink: normalizedMapLink,
         theme: document.getElementById("eventThemeInput").value,
         repeat: repeat,
         repeatInterval: repeat === "custom" ? repeatInterval : 1,
@@ -2787,6 +3078,7 @@ document.getElementById("saveEventDetails").addEventListener("click", function (
     saveEvents();
     createDays();
     updateReminders();
+    checkDueEventReminders();
     closeEventModalWindow();
     showToast(eventModalMode === "create" ? "Event created." : "Event updated.");
 });

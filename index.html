@@ -339,9 +339,18 @@
   </label>
 
   <label class="modal-field modal-field-wide">
-    <span>📍 Location</span>
-    <input type="text" id="eventLocationInput" placeholder="Enter location">
+    <span>📍 Location name</span>
+    <input type="text" id="eventLocationInput" placeholder="Example: Winnova, Pori">
   </label>
+
+  <div class="modal-field modal-field-wide">
+    <span>🗺 Google Maps link (optional)</span>
+    <div class="location-link-row">
+      <input type="url" id="eventMapLinkInput" placeholder="Paste a Google Maps shared link">
+      <button id="openEventMapBtn" class="secondary-button" type="button" disabled>Open in Maps</button>
+    </div>
+    <small class="field-help">Google Maps → Share → Copy link</small>
+  </div>
 
   <label class="modal-field">
     <span>🎨 Event Theme</span>
@@ -374,6 +383,7 @@
       <option value="10">10 minutes before</option>
       <option value="60">1 hour before</option>
       <option value="1440">1 day before</option>
+      <option value="daily-until">Daily until event date</option>
     </select>
   </label>
 
