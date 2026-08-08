@@ -1492,67 +1492,14 @@ function connectNotificationToEventMap(notification, eventItem) {
 }
 
 async function getEventDayWeatherSummary(eventItem) {
-  const locationQuery = String(eventItem && eventItem.location || "").trim();
-  let latitude = 61.566942;
-  let longitude = 21.813336;
-  let weatherLocation = "Pori";
+  const locationQuery =
+    String(eventItem && eventItem.location || "").trim() ||
+    selectedWeatherLocation ||
+    "Pori";
 
   try {
-    if (locationQuery) {
-      const locationWords = locationQuery.split(/[,\s]+/).filter(Boolean);
-      const searchCandidates = Array.from(new Set([
-        locationQuery,
-        locationWords[0],
-        locationWords[locationWords.length - 1]
-      ].filter(Boolean)));
-      let locationResult = null;
-
-      for (const searchLocation of searchCandidates) {
-        const geocodingUrl =
-          "https://geocoding-api.open-meteo.com/v1/search?name=" +
-          encodeURIComponent(searchLocation) +
-          "&count=1&language=en&format=json";
-        const geocodingResponse = await fetch(geocodingUrl);
-
-        if (!geocodingResponse.ok) {
-          continue;
-        }
-
-        const geocodingData = await geocodingResponse.json();
-        locationResult = geocodingData.results && geocodingData.results[0];
-
-        if (locationResult) {
-          break;
-        }
-      }
-
-      if (!locationResult) {
-        return "";
-      }
-
-      latitude = locationResult.latitude;
-      longitude = locationResult.longitude;
-      weatherLocation = locationResult.name || locationQuery;
-    }
-
-    const forecastUrl =
-      "https://api.open-meteo.com/v1/forecast?latitude=" +
-      encodeURIComponent(latitude) +
-      "&longitude=" + encodeURIComponent(longitude) +
-      "&current=temperature_2m,weather_code,wind_speed_10m" +
-      "&daily=precipitation_probability_max" +
-      "&timezone=auto&forecast_days=1";
-    const forecastResponse = await fetch(forecastUrl);
-
-    if (!forecastResponse.ok) {
-      return "";
-    }
-
-    const weatherData = await forecastResponse.json();
-
-    if (!weatherData.current || !weatherData.daily) {
-      return "";
-    }
+    const weatherResult = await fetchWeatherForLocation(locationQuery, 1);
+    const weatherData = weatherResult.data;
 
     const weatherDescription = getWeatherDescription(
       Number(weatherData.current.weather_code)
@@ -1567,7 +1514,7 @@ async function getEventDayWeatherSummary(eventItem) {
       return "";
     }
 
-    return weatherLocation + ": " +
+    return weatherResult.location.name + ": " +
       weatherDescription[0] + " " + weatherDescription[1] + ", " +
       Math.round(temperature) + "°C, " +
       "rain " + (Number.isFinite(rainProbability)
@@ -1969,7 +1916,16 @@ const weatherStatus = document.getElementById("weatherStatus");
 const weatherContent = document.getElementById("weatherContent");
 const weatherAlert = document.getElementById("weatherAlert");
 const refreshWeatherBtn = document.getElementById("refreshWeatherBtn");
+const weatherSearchForm = document.getElementById("weatherSearchForm");
+const weatherLocationSearch = document.getElementById("weatherLocationSearch");
+const weatherLocationLabel = document.getElementById("weatherLocationLabel");
+const weatherForecast = document.getElementById("weatherForecast");
+const locationTitle = document.getElementById("locationTitle");
+const locationMap = document.getElementById("locationMap");
 const weatherCacheKey = "smartCalendarWeather";
+const weatherLocationKey = "smartCalendarWeatherLocation";
+let selectedWeatherLocation =
+  localStorage.getItem(weatherLocationKey) || "Pori";
 
 function getWeatherDescription(code) {
   const weatherCodes = {
@@ -2004,6 +1960,110 @@ function getWeatherDescription(code) {
   };
 
   return weatherCodes[code] || ["🌡️", "Säätieto saatavilla"];
+}
+
+function getWeatherSearchCandidates(locationQuery) {
+  const cleanedQuery = String(locationQuery || "").trim();
+  const locationWords = cleanedQuery.split(/[,\s]+/).filter(Boolean);
+
+  return Array.from(new Set([
+    cleanedQuery,
+    locationWords[0],
+    locationWords[locationWords.length - 1]
+  ].filter(Boolean)));
+}
+
+async function geocodeWeatherLocation(locationQuery) {
+  const searchCandidates = getWeatherSearchCandidates(locationQuery);
+
+  for (const searchLocation of searchCandidates) {
+    const geocodingUrl =
+      "https://geocoding-api.open-meteo.com/v1/search?name=" +
+      encodeURIComponent(searchLocation) +
+      "&count=1&language=en&format=json";
+    const response = await fetch(geocodingUrl);
+
+    if (!response.ok) {
+      continue;
+    }
+
+    const data = await response.json();
+    const result = data.results && data.results[0];
+
+    if (result) {
+      return {
+        latitude: result.latitude,
+        longitude: result.longitude,
+        name: result.name || searchLocation,
+        country: result.country || "",
+        timezone: result.timezone || "auto"
+      };
+    }
+  }
+
+  throw new Error("Weather location was not found");
+}
+
+async function fetchWeatherForLocation(locationQuery, forecastDays = 10) {
+  const location = await geocodeWeatherLocation(locationQuery);
+  const weatherUrl =
+    "https://api.open-meteo.com/v1/forecast" +
+    "?latitude=" + encodeURIComponent(location.latitude) +
+    "&longitude=" + encodeURIComponent(location.longitude) +
+    "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,precipitation" +
+    "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,snowfall_sum,precipitation_probability_max,weather_code,wind_speed_10m_max" +
+    "&timezone=" + encodeURIComponent(location.timezone) +
+    "&forecast_days=" + Math.min(10, Math.max(1, forecastDays));
+  const response = await fetch(weatherUrl);
+
+  if (!response.ok) {
+    throw new Error("Weather request failed");
+  }
+
+  const data = await response.json();
+
+  if (!data.current || !data.daily || !Array.isArray(data.daily.time)) {
+    throw new Error("Weather response is incomplete");
+  }
+
+  return { data: data, location: location };
+}
+
+function getWeatherLocationLabel(location) {
+  return location.name + (location.country ? ", " + location.country : "");
+}
+
+function updateWeatherLocationDisplay(location) {
+  const label = getWeatherLocationLabel(location);
+
+  weatherLocationLabel.textContent = label;
+  locationTitle.textContent = label;
+  locationMap.src =
+    "https://www.google.com/maps?q=" +
+    encodeURIComponent(label) + "&output=embed";
+}
+
+function renderWeatherForecast(data) {
+  const daily = data.daily || {};
+
+  weatherForecast.innerHTML = "";
+  (daily.time || []).forEach(function (dateValue, index) {
+    const description = getWeatherDescription(Number(daily.weather_code[index]));
+    const forecastItem = document.createElement("div");
+    const dateLabel = new Date(dateValue + "T12:00:00").toLocaleDateString(
+      "fi-FI",
+      { weekday: "short", day: "numeric", month: "numeric" }
+    );
+
+    forecastItem.className = "weather-forecast-item";
+    forecastItem.innerHTML =
+      "<strong>" + escapeHtml(dateLabel) + "</strong>" +
+      "<span class=\"weather-forecast-icon\">" + description[0] + "</span>" +
+      "<span>" + Math.round(Number(daily.temperature_2m_max[index])) +
+      "° / " + Math.round(Number(daily.temperature_2m_min[index])) + "°</span>" +
+      "<small>Sade " + Math.round(Number(daily.precipitation_probability_max[index]) || 0) + "%</small>";
+    weatherForecast.appendChild(forecastItem);
+  });
 }
 
 function getWeatherNotices(data) {
@@ -2046,7 +2106,7 @@ function getWeatherNotices(data) {
   return notices;
 }
 
-function renderWeather(data, cached) {
+function renderWeather(data, cached, location) {
   const current = data.current || {};
   const daily = data.daily || {};
   const description = getWeatherDescription(Number(current.weather_code));
@@ -2071,6 +2131,9 @@ function renderWeather(data, cached) {
   document.getElementById("weatherRain").textContent =
     "Sade " + (Number.isFinite(rainChance) ? Math.round(rainChance) + "%" : "--");
 
+  updateWeatherLocationDisplay(location);
+  renderWeatherForecast(data);
+
   weatherAlert.classList.toggle("weather-alert-warning", notices.length > 0);
   weatherAlert.textContent = notices.length > 0
     ? "Kalenterin säähuomio: " + notices.join(" ")
@@ -2087,48 +2150,38 @@ function renderWeather(data, cached) {
 function readCachedWeather() {
   try {
     const cachedWeather = JSON.parse(localStorage.getItem(weatherCacheKey));
-    return cachedWeather && cachedWeather.data ? cachedWeather.data : null;
+    return cachedWeather && cachedWeather.data ? cachedWeather : null;
   } catch (error) {
     return null;
   }
 }
 
-async function loadWeather() {
-  const weatherUrl =
-    "https://api.open-meteo.com/v1/forecast" +
-    "?latitude=61.566942&longitude=21.813336" +
-    "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,precipitation" +
-    "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,snowfall_sum,precipitation_probability_max,weather_code" +
-    "&timezone=Europe%2FHelsinki&forecast_days=1";
-
+async function loadWeather(locationQuery = selectedWeatherLocation) {
   refreshWeatherBtn.disabled = true;
   weatherBox.setAttribute("aria-busy", "true");
   weatherStatus.textContent = "Säätietoja päivitetään…";
   weatherStatus.classList.remove("hidden");
 
   try {
-    const response = await fetch(weatherUrl);
-
-    if (!response.ok) {
-      throw new Error("Weather request failed");
-    }
-
-    const weatherData = await response.json();
-
-    if (!weatherData.current || !weatherData.daily) {
-      throw new Error("Weather response is incomplete");
-    }
+    const weatherResult = await fetchWeatherForLocation(locationQuery, 10);
+    const weatherData = weatherResult.data;
+    const weatherLocation = weatherResult.location;
 
     localStorage.setItem(weatherCacheKey, JSON.stringify({
       savedAt: Date.now(),
-      data: weatherData
+      data: weatherData,
+      location: weatherLocation,
+      query: locationQuery
     }));
-    renderWeather(weatherData, false);
+    selectedWeatherLocation = locationQuery;
+    localStorage.setItem(weatherLocationKey, selectedWeatherLocation);
+    weatherLocationSearch.value = locationQuery;
+    renderWeather(weatherData, false, weatherLocation);
   } catch (error) {
     const cachedWeather = readCachedWeather();
 
-    if (cachedWeather) {
-      renderWeather(cachedWeather, true);
+    if (cachedWeather && cachedWeather.location) {
+      renderWeather(cachedWeather.data, true, cachedWeather.location);
     } else {
       weatherContent.classList.add("hidden");
       weatherStatus.textContent =
@@ -2140,9 +2193,26 @@ async function loadWeather() {
   }
 }
 
-refreshWeatherBtn.addEventListener("click", loadWeather);
+weatherSearchForm.addEventListener("submit", function (event) {
+  event.preventDefault();
+  const searchValue = weatherLocationSearch.value.trim();
+
+  if (!searchValue) {
+    weatherStatus.textContent = "Kirjoita kaupungin tai paikan nimi.";
+    weatherStatus.classList.remove("hidden");
+    return;
+  }
+
+  loadWeather(searchValue);
+});
+refreshWeatherBtn.addEventListener("click", function () {
+  loadWeather(selectedWeatherLocation);
+});
+weatherLocationSearch.value = selectedWeatherLocation;
 loadWeather();
-setInterval(loadWeather, 30 * 60 * 1000);
+setInterval(function () {
+  loadWeather(selectedWeatherLocation);
+}, 30 * 60 * 1000);
 
 updateMonth();
 updateReminders();
@@ -2162,6 +2232,8 @@ const eventDate = document.getElementById("eventDate");
 const eventLocationInput = document.getElementById("eventLocationInput");
 const eventMapLinkInput = document.getElementById("eventMapLinkInput");
 const openEventMapBtn = document.getElementById("openEventMapBtn");
+const checkEventWeatherBtn = document.getElementById("checkEventWeatherBtn");
+const eventWeatherPreview = document.getElementById("eventWeatherPreview");
 
 const modalEventImage = document.getElementById("modalEventImage");
 const eventImagePreview = document.getElementById("eventImagePreview");
@@ -2294,6 +2366,71 @@ function openCurrentEventMap() {
     window.open(mapUrl, "_blank", "noopener");
 }
 
+function resetEventWeatherPreview() {
+    eventWeatherPreview.textContent = "";
+    eventWeatherPreview.classList.add("hidden");
+}
+
+function updateEventWeatherButton() {
+    checkEventWeatherBtn.disabled = !(
+        eventLocationInput.value.trim() && eventDate.value
+    );
+}
+
+async function checkEventWeather() {
+    const locationName = eventLocationInput.value.trim();
+    const eventDateValue = eventDate.value;
+
+    if (!locationName || !eventDateValue) {
+        return;
+    }
+
+    checkEventWeatherBtn.disabled = true;
+    checkEventWeatherBtn.textContent = "Checking weather…";
+    eventWeatherPreview.textContent = "Loading forecast…";
+    eventWeatherPreview.classList.remove("hidden", "error");
+
+    try {
+        const weatherResult = await fetchWeatherForLocation(locationName, 10);
+        const daily = weatherResult.data.daily;
+        const forecastIndex = daily.time.indexOf(eventDateValue);
+
+        if (forecastIndex === -1) {
+            throw new Error(
+                "Forecast is currently available from " +
+                daily.time[0] + " to " + daily.time[daily.time.length - 1] + "."
+            );
+        }
+
+        const description = getWeatherDescription(
+            Number(daily.weather_code[forecastIndex])
+        );
+        const rainChance = Math.round(
+            Number(daily.precipitation_probability_max[forecastIndex]) || 0
+        );
+        const windSpeed = Math.round(
+            Number(daily.wind_speed_10m_max[forecastIndex]) || 0
+        );
+
+        eventWeatherPreview.textContent =
+            getWeatherLocationLabel(weatherResult.location) + " · " +
+            description[0] + " " + description[1] + " · " +
+            Math.round(Number(daily.temperature_2m_max[forecastIndex])) +
+            "° / " +
+            Math.round(Number(daily.temperature_2m_min[forecastIndex])) +
+            "° · Rain " + rainChance + "% · Wind " + windSpeed + " km/h";
+    } catch (error) {
+        eventWeatherPreview.textContent =
+            error && error.message
+                ? error.message
+                : "Weather forecast could not be loaded.";
+        eventWeatherPreview.classList.add("error");
+    } finally {
+        checkEventWeatherBtn.textContent = "Check event weather";
+        updateEventWeatherButton();
+    }
+}
+
 function resetEventModalFields(dateKey) {
     const dateValue = calendarKeyToDateInput(dateKey);
 
@@ -2323,6 +2460,8 @@ function resetEventModalFields(dateKey) {
     updateCustomRepeatVisibility();
     updateAllDayFields();
     updateOpenEventMapButton();
+    resetEventWeatherPreview();
+    updateEventWeatherButton();
 }
 
 function openCreateEventModal(dateKey) {
@@ -2677,6 +2816,8 @@ document.getElementById("reviewSuggestedEventBtn").addEventListener("click", fun
     document.getElementById("eventNotesInput").value = pendingTextSuggestion.notes;
     updateAllDayFields();
     updateOpenEventMapButton();
+    resetEventWeatherPreview();
+    updateEventWeatherButton();
 });
 
 document.getElementById("closeTextImportModal").addEventListener(
@@ -2713,9 +2854,18 @@ document.getElementById("eventAllDayInput").addEventListener(
     "change",
     updateAllDayFields
 );
-eventLocationInput.addEventListener("input", updateOpenEventMapButton);
+eventLocationInput.addEventListener("input", function () {
+    updateOpenEventMapButton();
+    resetEventWeatherPreview();
+    updateEventWeatherButton();
+});
+eventDate.addEventListener("change", function () {
+    resetEventWeatherPreview();
+    updateEventWeatherButton();
+});
 eventMapLinkInput.addEventListener("input", updateOpenEventMapButton);
 openEventMapBtn.addEventListener("click", openCurrentEventMap);
+checkEventWeatherBtn.addEventListener("click", checkEventWeather);
 
 document.addEventListener("keydown", function (event) {
     const isEscape = event.key === "Escape";
@@ -2865,6 +3015,8 @@ clearModalFormError();
 updateCustomRepeatVisibility();
 updateAllDayFields();
 updateOpenEventMapButton();
+resetEventWeatherPreview();
+updateEventWeatherButton();
 eventModalTitle.textContent = "📅 Event details";
 document.getElementById("saveEventDetails").textContent = "Save changes";
 deleteEventBtn.classList.remove("hidden");
